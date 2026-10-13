@@ -10,4 +10,4 @@ Untuk memenuhi Tugas Besar Pemrograman Perangkat Bergerak (PPB)
 |SALMAN AL FARIZIN | 103022400101 |
 |Nathaniel Christian Triyono | 1302223132 |
 |Arvin Taoran Anthaqi | 1302220100 |
-|null | null |
+|Masagus Ahmad Fadhil | 103022400042 |
