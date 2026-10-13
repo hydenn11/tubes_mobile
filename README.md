@@ -8,6 +8,6 @@ Untuk memenuhi Tugas Besar Pemrograman Perangkat Bergerak (PPB)
 |:-------|:-----------:|
 |Luthfi Rezkiansyah Ramadhani | 103022300147 |
 |SALMAN AL FARIZIN | 103022400101 |
-|null | null |
-|null | null |
+|Nathaniel Christian Triyono | 1302223132 |
+|Arvin Taoran Anthaqi | 1302220100 |
 |null | null |
