@@ -6,7 +6,7 @@ class name_input extends StatelessWidget {
   final String label;
   final bool isEror;
   final String? hintText;
-  final IconData prefixIcon;
+  final IconData? prefixIcon;
 
   const name_input({
     super.key,
@@ -14,7 +14,7 @@ class name_input extends StatelessWidget {
     required this.label,
     required this.isEror,
     this.hintText,
-    this.prefixIcon = Icons.person_outline_rounded,
+    this.prefixIcon,
   });
 
   @override
@@ -41,11 +41,13 @@ class name_input extends StatelessWidget {
         decoration: InputDecoration(
           filled: true,
           fillColor: const Color(0xFFF8FAFC),
-          prefixIcon: Icon(
-            prefixIcon,
-            size: 22,
-            color: isEror ? dangerColor : thirdColor,
-          ),
+          prefixIcon: prefixIcon != null
+              ? Icon(
+                  prefixIcon,
+                  size: 22,
+                  color: isEror ? dangerColor : thirdColor,
+                )
+              : null,
           labelText: label,
           hintText: hintText,
           hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),

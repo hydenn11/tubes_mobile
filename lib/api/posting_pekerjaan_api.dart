@@ -1,65 +1,53 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:rekanpabrik/utils/api_url.dart';
+import 'package:rekanpabrik/dummy/dummy_postingan_pekerjaan.dart';
+import 'package:rekanpabrik/dummy/dummy_perusahaan.dart';
 
 class Postingpekerjaanapi {
-  final String apiUrl = getApiUrl();
+  final String apiUrl = 'dummy_mode';
+
+  List<Map<String, dynamic>> _formatJobsList() {
+    return dummyPostPekerjaan.map((item) {
+      final idPost = item['id_post_pekerjaan'] ?? 1;
+      final idPerusahaan = item['id_perusahaan'] ?? 1;
+      final matchCompany = dummyPerusahaan.firstWhere(
+        (c) => c['id'] == idPerusahaan,
+        orElse: () => {'nama': 'PT Nusantara Sejahtera', 'namaPerusahaanAsli': 'PT Nusantara Sejahtera'},
+      );
+      final namaPerusahaan = matchCompany['namaPerusahaanAsli'] ?? matchCompany['nama'] ?? 'PT Nusantara Sejahtera';
+
+      String createdAtStr = '2024-10-01T08:00:00.000';
+      if (item['createdAt'] is DateTime) {
+        createdAtStr = (item['createdAt'] as DateTime).toIso8601String();
+      }
+
+      return {
+        'id_post_pekerjaan': idPost,
+        'id_perusahaan': idPerusahaan,
+        'posisi': item['posisi'] ?? 'Operator Produksi',
+        'lokasi': item['lokasi'] ?? 'Cikarang, Jawa Barat',
+        'job_details': item['job_details'] ?? 'Menjalankan operasional produksi sesuai SOP.',
+        'requirements': item['requirements'] ?? 'Pendidikan minimal SMA/SMK sederajat.',
+        'status': item['status'] ?? 'tersedia',
+        'createdAt': createdAtStr,
+        'nama_perusahaan': namaPerusahaan,
+      };
+    }).toList();
+  }
 
   Future<List<Map<String, dynamic>>> getPostPekerjaan(int idPerusahaan) async {
-    final prefs = await SharedPreferences.getInstance();
-
-    final token = prefs.getString('auth_token');
-
-    final url = '$apiUrl/jobs/company/$idPerusahaan';
-
-    print("GET JOBS URL : $url");
-
-    final response = await http.get(
-      Uri.parse(url),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
-
-    print("STATUS : ${response.statusCode}");
-    print("BODY : ${response.body}");
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-
-      return List<Map<String, dynamic>>.from(
-        data['data'],
-      );
-    }
-
-    throw Exception('Gagal mengambil data postingan pekerjaan');
+    await Future.delayed(const Duration(milliseconds: 100));
+    final list = _formatJobsList();
+    final filtered = list.where((j) => j['id_perusahaan'] == idPerusahaan).toList();
+    if (filtered.isNotEmpty) return filtered;
+    return list;
   }
 
   Future<List<Map<String, dynamic>>> detailsJob(int idPostingan) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    String? token = prefs.getString('auth_token');
-
-    final response = await http.get(
-      Uri.parse('$apiUrl/jobs/$idPostingan'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      var data = json.decode(response.body);
-
-      List<dynamic> jobs = data['data'];
-
-      return jobs.map((e) => Map<String, dynamic>.from(e)).toList();
-    }
-
-    throw Exception('Gagal mengambil detail pekerjaan');
+    await Future.delayed(const Duration(milliseconds: 100));
+    final list = _formatJobsList();
+    final match = list.where((j) => j['id_post_pekerjaan'] == idPostingan).toList();
+    if (match.isNotEmpty) return match;
+    return list.take(1).toList();
   }
 
   Future<bool> postingPekerjaann(
@@ -69,129 +57,101 @@ class Postingpekerjaanapi {
     String jobDetails,
     String requirements,
   ) async {
-    print("API URL : $apiUrl/jobs");
-
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
-
-    final response = await http.post(
-      Uri.parse('$apiUrl/jobs'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode({
-        'idPerusahaan': idPerusahaan,
-        'posisi': posisi,
-        'lokasi': lokasi,
-        'jobDetails': jobDetails,
-        'requirements': requirements,
-      }),
-    );
-
-    print("STATUS : ${response.statusCode}");
-    print("BODY : ${response.body}");
-
-    return response.statusCode == 201;
+    await Future.delayed(const Duration(milliseconds: 200));
+    // Menambahkan secara lokal ke list
+    dummyPostPekerjaan.insert(0, {
+      'id_post_pekerjaan': dummyPostPekerjaan.length + 1,
+      'id_perusahaan': idPerusahaan,
+      'posisi': posisi,
+      'lokasi': lokasi,
+      'job_details': jobDetails,
+      'requirements': requirements,
+      'status': 'tersedia',
+      'createdAt': DateTime.now(),
+    });
+    return true;
   }
 
   Future<bool> ubahStatusPekerjaann(int idPostPekerjaan, String status) async {
-    final prefs = await SharedPreferences.getInstance();
-
-    final token = prefs.getString('auth_token');
-
-    if (token == null) {
-      return false;
+    await Future.delayed(const Duration(milliseconds: 150));
+    final index = dummyPostPekerjaan.indexWhere(
+        (element) => element['id_post_pekerjaan'] == idPostPekerjaan);
+    if (index != -1) {
+      dummyPostPekerjaan[index]['status'] = status;
     }
-
-    final response = await http.patch(
-      Uri.parse('$apiUrl/jobs/$idPostPekerjaan/status'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode({
-        'status': status,
-      }),
-    );
-
-    return response.statusCode == 200;
+    return true;
   }
 
   Future<List<Map<String, dynamic>>> getPelamarByCompanyId(
       int idPerusahaan) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
-
-    final url = '$apiUrl/perusahaan/$idPerusahaan/applications';
-
-    print("GET PELAMAR URL : $url");
-
-    final response = await http.get(
-      Uri.parse(url),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
+    await Future.delayed(const Duration(milliseconds: 100));
+    return [
+      {
+        'id_lamaran_pekerjaan': 1,
+        'id_pelamar': 1,
+        'first_name': 'Rafif',
+        'last_name': 'Purnomo',
+        'email': 'rafif@gmail.com',
+        'profile_pict': 'assets/img/defaultPict.png',
+        'link_cv': 'assets/docs/cv_rafif.pdf',
+        'status_lamaran': 'diproses',
+        'posisi_dilamar': 'Software Engineer',
+        'posisi': 'Software Engineer',
+        'nama_perusahaan': 'PT Nusantara Sejahtera',
+        'createdAt': '2024-10-15T08:30:00.000',
       },
-    );
-
-    print("STATUS : ${response.statusCode}");
-    print("BODY : ${response.body}");
-
-    if (response.statusCode == 200) {
-      final jsonResponse = jsonDecode(response.body);
-
-      return List<Map<String, dynamic>>.from(
-        jsonResponse['data'],
-      );
-    }
-
-    throw Exception('Gagal mengambil data pelamar');
+      {
+        'id_lamaran_pekerjaan': 2,
+        'id_pelamar': 2,
+        'first_name': 'Budi',
+        'last_name': 'Santoso',
+        'email': 'budi@gmail.com',
+        'profile_pict': 'assets/img/defaultPict.png',
+        'link_cv': 'assets/docs/cv_budi.pdf',
+        'status_lamaran': 'diterima',
+        'posisi_dilamar': 'Marketing Manager',
+        'posisi': 'Marketing Manager',
+        'nama_perusahaan': 'PT Nusantara Sejahtera',
+        'createdAt': '2024-10-16T09:15:00.000',
+      },
+      {
+        'id_lamaran_pekerjaan': 3,
+        'id_pelamar': 3,
+        'first_name': 'Siti',
+        'last_name': 'Aminah',
+        'email': 'siti@gmail.com',
+        'profile_pict': 'assets/img/defaultPict.png',
+        'link_cv': 'assets/docs/cv_siti.pdf',
+        'status_lamaran': 'ditolak',
+        'posisi_dilamar': 'Data Analyst',
+        'posisi': 'Data Analyst',
+        'nama_perusahaan': 'PT Nusantara Sejahtera',
+        'createdAt': '2024-10-17T11:00:00.000',
+      },
+    ];
   }
 
   Future<Map<String, dynamic>> getDetailPelamar(int idLamaranPekerjaan) async {
-    final prefs = await SharedPreferences.getInstance();
-
-    final token = prefs.getString('auth_token');
-
-    final response = await http.get(
-      Uri.parse('$apiUrl/jobs/applications/$idLamaranPekerjaan'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-
-      return Map<String, dynamic>.from(data['data'][0]);
-    }
-
-    throw Exception('Gagal mengambil detail pelamar');
+    await Future.delayed(const Duration(milliseconds: 100));
+    return {
+      'id_lamaran_pekerjaan': idLamaranPekerjaan,
+      'id_pelamar': 1,
+      'first_name': 'Rafif',
+      'last_name': 'Purnomo',
+      'email': 'rafif@gmail.com',
+      'profile_pict': 'assets/img/defaultPict.png',
+      'link_cv': 'assets/docs/cv_rafif.pdf',
+      'status_lamaran': 'diproses',
+      'posisi_dilamar': 'Software Engineer',
+      'about_me': 'Lulusan Teknik Mesin dengan sertifikasi K3 dan pengalaman 2 tahun di manufaktur.',
+      'nomor_telpon': '081234567890',
+      'alamat': 'Jl. Industri No. 10, Cikarang',
+      'createdAt': '2024-10-15T08:30:00.000',
+    };
   }
 
   Future<List<Map<String, dynamic>>> getAllPostPekerjaan() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    String? token = prefs.getString('auth_token');
-
-    final response = await http.get(
-      Uri.parse('$apiUrl/jobs'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      var data = json.decode(response.body);
-
-      List<dynamic> postings = data['data'];
-
-      return postings.map((e) => Map<String, dynamic>.from(e)).toList();
-    }
-
-    throw Exception('Gagal mengambil seluruh postingan');
+    await Future.delayed(const Duration(milliseconds: 100));
+    return _formatJobsList();
   }
 }

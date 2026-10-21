@@ -4,11 +4,13 @@ import 'package:rekanpabrik/shared/shared.dart';
 class ConfirmPassInput extends StatefulWidget {
   final TextEditingController controller;
   final bool isEror;
+  final IconData? prefixIcon;
 
   const ConfirmPassInput({
     super.key,
     required this.controller,
     required this.isEror,
+    this.prefixIcon,
   });
 
   @override
@@ -43,11 +45,13 @@ class _confirmPassInput extends State<ConfirmPassInput> {
         decoration: InputDecoration(
           filled: true,
           fillColor: const Color(0xFFF8FAFC),
-          prefixIcon: Icon(
-            Icons.lock_reset_rounded,
-            size: 22,
-            color: widget.isEror ? dangerColor : thirdColor,
-          ),
+          prefixIcon: widget.prefixIcon != null
+              ? Icon(
+                  widget.prefixIcon,
+                  size: 22,
+                  color: widget.isEror ? dangerColor : thirdColor,
+                )
+              : null,
           labelText: 'Konfirmasi Password',
           hintText: 'Ulangi password Anda',
           hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),

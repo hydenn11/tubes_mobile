@@ -10,6 +10,7 @@ Color greyColor = const Color(0xFF64748B);       // Slate 500
 Color lightGreyColor = const Color(0xFFE2E8F0);  // Slate 200
 Color dangerColor = const Color(0xFFEF4444);     // Red 500
 Color succesColor = const Color(0xFF10B981);     // Emerald 500
+Color darkMaroon = const Color(0xFF801C1C);      // Dark Maroon (Theme accent)
 
 TextStyle poppins = GoogleFonts.poppins();
 

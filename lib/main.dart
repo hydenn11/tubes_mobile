@@ -7,7 +7,10 @@ import 'package:rekanpabrik/pages/welcoming_text.dart';
 import 'package:rekanpabrik/shared/shared.dart';
 
 void main() async {
-  await dotenv.load(fileName: ".env");
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (_) {}
   runApp(const MyApp());
 }
 

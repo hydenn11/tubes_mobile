@@ -55,5 +55,7 @@
   "C_Cpp_Runner.useLeakSanitizer": false,
   "C_Cpp_Runner.showCompilationTime": false,
   "C_Cpp_Runner.useLinkTimeOptimization": false,
-  "C_Cpp_Runner.msvcSecureNoWarnings": false
+  "C_Cpp_Runner.msvcSecureNoWarnings": false,
+  "gradle.java.home": "C:\\Program Files\\Java\\jdk-17",
+  "java.import.gradle.java.home": "C:\\Program Files\\Java\\jdk-17"
 }

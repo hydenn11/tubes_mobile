@@ -56,8 +56,8 @@ class _registerPelamarState extends State<register_pelamar> {
     return (pass == confirmPass);
   }
 
-  Future<void> createAccount(String Fname, String Lname, String username, String email,
-      String password, String confirmPass) async {
+  Future<void> createAccount(String Fname, String Lname, String username,
+      String email, String password, String confirmPass) async {
     setState(() {
       // Reset semua error messages
       FNameErrorMessage = '';
@@ -158,7 +158,6 @@ class _registerPelamarState extends State<register_pelamar> {
     }
   }
 
-
   void _initializeNotifications() async {
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -196,120 +195,168 @@ class _registerPelamarState extends State<register_pelamar> {
 
   @override
   Widget build(BuildContext context) {
+    final double topSafeArea = MediaQuery.of(context).padding.top;
+
     return Scaffold(
-      backgroundColor: backgroundColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded,
-              color: blackColor, size: 20),
-          onPressed: () {
-            if (Navigator.canPop(context)) {
-              Navigator.pop(context);
-            } else {
-              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-            }
-          },
-        ),
+      backgroundColor: Colors.white,
+      body: SizedBox.expand(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Top Wave SVG
+            Positioned(
+              top: topSafeArea,
+              left: 0,
+              right: 0,
+              child: SvgPicture.string(
+                _topWaveSvg,
+                fit: BoxFit.fill,
+                width: MediaQuery.of(context).size.width,
+              ),
+            ),
 
+            // Bottom Wave SVG
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: SvgPicture.string(
+                _bottomWaveSvg,
+                fit: BoxFit.contain,
+              ),
+            ),
 
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Switch role banner
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: secondaryCoolor,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: thirdColor.withOpacity(0.2)),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.business_rounded, color: thirdColor, size: 24),
-                    const SizedBox(width: 12),
-                    Expanded(
+            // Foreground Content
+            SafeArea(
+              child: Column(
+                children: [
+                  // Top Back Button
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8, top: 4),
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                            color: Colors.white, size: 20),
+                        onPressed: () {
+                          if (Navigator.canPop(context)) {
+                            Navigator.pop(context);
+                          } else {
+                            Navigator.pushNamedAndRemoveUntil(
+                                context, '/', (route) => false);
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 8),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "Mendaftar sebagai Perusahaan?",
+                          const SizedBox(height: 10),
+                          const Text(
+                            "Daftar Akun Pelamar",
                             style: TextStyle(
+                              color: Colors.white,
                               fontFamily: 'poppins',
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: blackColor,
+                              fontSize: 26,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.5,
                             ),
                           ),
+                          const SizedBox(height: 6),
                           Text(
-                            "Pasang lowongan & kelola pelamar",
+                            "Lengkapi data diri untuk mulai mencari peluang kerja.",
                             style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.85),
                               fontFamily: 'poppins',
-                              fontSize: 11,
-                              color: greyColor,
+                              fontSize: 13,
+                              height: 1.4,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => register_hrd()),
-                        );
-                      },
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        backgroundColor: thirdColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text(
-                        "Pindah",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'poppins',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                          const SizedBox(height: 36),
 
-              const SizedBox(height: 24),
+                          // Switch role banner
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.08),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                              border: Border.all(
+                                  color: darkMaroon.withValues(alpha: 0.15)),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.business_rounded,
+                                    color: darkMaroon, size: 24),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Mendaftar sebagai Perusahaan?",
+                                        style: TextStyle(
+                                          fontFamily: 'poppins',
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          color: blackColor,
+                                        ),
+                                      ),
+                                      Text(
+                                        "Pasang lowongan & kelola pelamar",
+                                        style: TextStyle(
+                                          fontFamily: 'poppins',
+                                          fontSize: 11,
+                                          color: greyColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => register_hrd()),
+                                    );
+                                  },
+                                  style: TextButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 6),
+                                    backgroundColor: darkMaroon,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    "Pindah",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: 'poppins',
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
 
-              // Title
-              Text(
-                "Buat Akun Pelamar",
-                style: TextStyle(
-                  color: blackColor,
-                  fontFamily: 'poppins',
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                "Lengkapi data diri untuk mulai mencari peluang kerja.",
-                style: TextStyle(
-                  color: greyColor,
-                  fontFamily: 'poppins',
-                  fontSize: 13,
-                ),
-              ),
+                          const SizedBox(height: 24),
 
               const SizedBox(height: 28),
 
@@ -374,7 +421,6 @@ class _registerPelamarState extends State<register_pelamar> {
                 nameInputController: usernameController,
                 label: "Username",
                 hintText: "contoh: arvin_12",
-                prefixIcon: Icons.alternate_email_rounded,
                 isEror: usernameIsEror,
               ),
               if (usernameErrorMessage.isNotEmpty)
@@ -445,7 +491,7 @@ class _registerPelamarState extends State<register_pelamar> {
               // Submit Button
               SizedBox(
                 width: double.infinity,
-                height: 56,
+                height: 54,
                 child: ElevatedButton(
                   onPressed: () {
                     String Fname = FNameController.text.trim();
@@ -455,14 +501,14 @@ class _registerPelamarState extends State<register_pelamar> {
                     String pass = passwordController.text.trim();
                     String confirmPass = confirmPasswordController.text.trim();
 
-                    createAccount(Fname, Lname, username, email, pass, confirmPass);
+                    createAccount(
+                        Fname, Lname, username, email, pass, confirmPass);
                   },
-
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: thirdColor,
+                    backgroundColor: darkMaroon,
                     foregroundColor: Colors.white,
                     elevation: 4,
-                    shadowColor: thirdColor.withOpacity(0.4),
+                    shadowColor: darkMaroon.withValues(alpha: 0.4),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -471,7 +517,7 @@ class _registerPelamarState extends State<register_pelamar> {
                     'Daftar Akun Sekarang',
                     style: TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                       fontFamily: 'poppins',
                     ),
                   ),
@@ -495,7 +541,7 @@ class _registerPelamarState extends State<register_pelamar> {
                       TextSpan(
                         text: "Masuk Sekarang",
                         style: TextStyle(
-                          color: thirdColor,
+                          color: darkMaroon,
                           fontWeight: FontWeight.w700,
                         ),
                         recognizer: TapGestureRecognizer()
@@ -518,6 +564,12 @@ class _registerPelamarState extends State<register_pelamar> {
           ),
         ),
       ),
-    );
+    ],
+  ),
+),
+],
+),
+),
+);
   }
 }

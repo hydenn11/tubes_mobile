@@ -105,66 +105,89 @@ class _loginPageState extends State<login_page> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded,
-              color: blackColor, size: 20),
-          onPressed: () {
-            if (Navigator.canPop(context)) {
-              Navigator.pop(context);
-            } else {
-              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-            }
-          },
-        ),
-      ),
-      body: SafeArea(
+    final double topSafeArea = MediaQuery.of(context).padding.top;
 
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 10),
-              // Brand Icon & Header
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: secondaryCoolor,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(
-                  Icons.lock_open_rounded,
-                  color: thirdColor,
-                  size: 28,
-                ),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SizedBox.expand(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Top Wave SVG
+            Positioned(
+              top: topSafeArea,
+              left: 0,
+              right: 0,
+              child: SvgPicture.string(
+                _topWaveSvg,
+                fit: BoxFit.fill,
+                width: MediaQuery.of(context).size.width,
               ),
-              const SizedBox(height: 20),
-              Text(
-                "Selamat Datang",
-                style: TextStyle(
-                  color: blackColor,
-                  fontFamily: 'poppins',
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
-                ),
+            ),
+
+            // Bottom Wave SVG
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: SvgPicture.string(
+                _bottomWaveSvg,
+                fit: BoxFit.contain,
               ),
-              const SizedBox(height: 8),
-              Text(
-                "Masuk untuk melanjutkan dan mengelola akun RekanPabrik Anda.",
-                style: TextStyle(
-                  color: greyColor,
-                  fontFamily: 'poppins',
-                  fontSize: 14,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 36),
+            ),
+
+            // Foreground Content
+            SafeArea(
+              child: Column(
+                children: [
+                  // Top Back Button
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8, top: 4),
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                            color: Colors.white, size: 20),
+                        onPressed: () {
+                          if (Navigator.canPop(context)) {
+                            Navigator.pop(context);
+                          } else {
+                            Navigator.pushNamedAndRemoveUntil(
+                                context, '/', (route) => false);
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 10),
+                          const Text(
+                            "Selamat Datang",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'poppins',
+                              fontSize: 28,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            "Masuk untuk melanjutkan dan mengelola akun RekanPabrik Anda.",
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.85),
+                              fontFamily: 'poppins',
+                              fontSize: 14,
+                              height: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 66),
 
               // Form Inputs
               EmailInput(
@@ -172,7 +195,6 @@ class _loginPageState extends State<login_page> {
                 isEror: mailIsEror,
                 labelText: 'Email atau Username',
                 hintText: 'nama@email.com atau username',
-                prefixIcon: Icons.person_outline_rounded,
               ),
 
               if (emailErrorMessage.isNotEmpty)
@@ -236,7 +258,7 @@ class _loginPageState extends State<login_page> {
                     'Lupa Password?',
                     style: TextStyle(
                       fontSize: 13,
-                      color: thirdColor,
+                      color: darkMaroon,
                       fontWeight: FontWeight.w600,
                       fontFamily: 'poppins',
                     ),
@@ -249,11 +271,11 @@ class _loginPageState extends State<login_page> {
               // Tombol Masuk
               SizedBox(
                 width: double.infinity,
-                height: 56,
+                height: 54,
                 child: isLoading
                     ? Center(
                         child: CircularProgressIndicator(
-                          color: thirdColor,
+                          color: darkMaroon,
                         ),
                       )
                     : ElevatedButton(
@@ -263,10 +285,10 @@ class _loginPageState extends State<login_page> {
                           LoginUser(email, pass);
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: thirdColor,
+                          backgroundColor: darkMaroon,
                           foregroundColor: Colors.white,
                           elevation: 4,
-                          shadowColor: thirdColor.withOpacity(0.4),
+                          shadowColor: darkMaroon.withValues(alpha: 0.4),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
@@ -275,7 +297,7 @@ class _loginPageState extends State<login_page> {
                           'Masuk ke Akun',
                           style: TextStyle(
                             fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w700,
                             fontFamily: 'poppins',
                           ),
                         ),
@@ -299,7 +321,7 @@ class _loginPageState extends State<login_page> {
                       TextSpan(
                         text: "Daftar Sekarang",
                         style: TextStyle(
-                          color: thirdColor,
+                          color: darkMaroon,
                           fontWeight: FontWeight.w700,
                         ),
                         recognizer: TapGestureRecognizer()
@@ -320,6 +342,12 @@ class _loginPageState extends State<login_page> {
           ),
         ),
       ),
-    );
+    ],
+  ),
+),
+],
+),
+),
+);
   }
 }

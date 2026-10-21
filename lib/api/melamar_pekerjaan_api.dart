@@ -1,169 +1,91 @@
-import 'dart:convert';
-
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:rekanpabrik/utils/api_url.dart';
 
 class MelamarPekerjaanapi {
-  final String apiUrl = getApiUrl();
+  final String apiUrl = 'dummy_mode';
+
+  static final List<Map<String, dynamic>> _dummyHistory = [
+    {
+      'id_lamaran_pekerjaan': 1,
+      'nama_perusahaan': 'PT Nusantara Sejahtera',
+      'posisi': 'Software Engineer',
+      'status_lamaran': 'diproses',
+      'createdAt': '2024-10-15T08:30:00.000',
+      'first_name': 'Rafif',
+      'last_name': 'Purnomo',
+    },
+    {
+      'id_lamaran_pekerjaan': 2,
+      'nama_perusahaan': 'CV Citra Teknologi',
+      'posisi': 'Marketing Manager',
+      'status_lamaran': 'diterima',
+      'createdAt': '2024-10-12T10:00:00.000',
+      'first_name': 'Rafif',
+      'last_name': 'Purnomo',
+    },
+    {
+      'id_lamaran_pekerjaan': 3,
+      'nama_perusahaan': 'PT Maju Jaya Abadi',
+      'posisi': 'Data Analyst',
+      'status_lamaran': 'ditolak',
+      'createdAt': '2024-10-08T14:20:00.000',
+      'first_name': 'Rafif',
+      'last_name': 'Purnomo',
+    },
+  ];
 
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('auth_token');
+    return prefs.getString('auth_token') ?? 'dummy_token_12345';
   }
 
-  Future<List<Map<String, dynamic>>> gethistoryLamaran(
-      int idPelamar) async {
-    final token = await _getToken();
-
-    if (token == null) {
-      throw Exception("Token tidak ditemukan");
-    }
-
-    final url =
-    Uri.parse('$apiUrl/applications/pelamar/$idPelamar');
-
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
-
-    print("===== HISTORY LAMARAN =====");
-    print("URL : $url");
-    print("STATUS : ${response.statusCode}");
-    print("BODY : ${response.body}");
-    print("===========================");
-
-    if (response.statusCode == 200) {
-      final jsonResponse = jsonDecode(response.body);
-
-      return List<Map<String, dynamic>>.from(
-        jsonResponse['data'] ?? [],
-      );
-    }
-
-    throw Exception(
-      'Gagal mengambil data history lamaran',
-    );
+  Future<List<Map<String, dynamic>>> gethistoryLamaran(int idPelamar) async {
+    await Future.delayed(const Duration(milliseconds: 100));
+    return _dummyHistory;
   }
 
   Future<Map<String, dynamic>> lamarPekerjaan(
       int idPostPekerjaan, int idPelamar) async {
-    final token = await _getToken();
-
-    if (token == null) {
-      return {
-        "success": false,
-        "message": "Token tidak ditemukan"
-      };
-    }
-
-    final url = Uri.parse('$apiUrl/applications');
-
-    final response = await http.post(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        "idPostPekerjaan": idPostPekerjaan,
-        "idPelamar": idPelamar,
-      }),
-    );
-
-    print("===== MELAMAR =====");
-    print("URL : $url");
-    print("STATUS : ${response.statusCode}");
-    print("BODY : ${response.body}");
-    print("===================");
-
-    final data = jsonDecode(response.body);
-
-    if (response.statusCode == 201) {
-      return {
-        "success": true,
-        "message": data["message"],
-      };
-    }
+    await Future.delayed(const Duration(milliseconds: 200));
+    _dummyHistory.insert(0, {
+      'id_lamaran_pekerjaan': _dummyHistory.length + 1,
+      'nama_perusahaan': 'PT Nusantara Sejahtera',
+      'posisi': 'Lowongan Pekerjaan Industri',
+      'status_lamaran': 'diproses',
+      'createdAt': DateTime.now().toIso8601String(),
+      'first_name': 'Rafif',
+      'last_name': 'Purnomo',
+    });
 
     return {
-      "success": false,
-      "message": data["message"] ??
-          "Gagal mengirim lamaran",
+      "success": true,
+      "message": "Lamaran berhasil dikirim (Mode Frontend)",
     };
   }
 
   Future<Map<String, dynamic>> getDetailPostinganByIdPostingan(
       int idPostingan) async {
-    final token = await _getToken();
-
-    final url =
-    Uri.parse('$apiUrl/applications/post/$idPostingan');
-
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
-
-    print("===== DETAIL LAMARAN =====");
-    print("URL : $url");
-    print("STATUS : ${response.statusCode}");
-    print("BODY : ${response.body}");
-    print("==========================");
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-
-      return Map<String, dynamic>.from(
-        data['data'],
-      );
-    }
-
-    throw Exception(
-      'Gagal mengambil detail lamaran',
-    );
+    await Future.delayed(const Duration(milliseconds: 100));
+    return {
+      'id_post_pekerjaan': idPostingan,
+      'posisi': 'Software Engineer',
+      'nama_perusahaan': 'PT Nusantara Sejahtera',
+      'status': 'tersedia',
+      'lokasi': 'Jakarta',
+      'job_details': 'Mengembangkan aplikasi berbasis mobile dan web.',
+      'requirements': 'Pengalaman minimal 1 tahun.',
+    };
   }
 
   Future<bool> ubahStatusPelamar(
-      String status,
-      int idLamaranPekerjaan,
-      ) async {
-    final token = await _getToken();
-
-    print("STATUS YANG DIKIRIM:");
-    print(status);
-
-    print("ID LAMARAN:");
-    print(idLamaranPekerjaan);
-
-    final url =
-    Uri.parse('$apiUrl/applications/$idLamaranPekerjaan');
-
-    final response = await http.patch(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        "status": status,
-      }),
-    );
-
-    print("===== UPDATE STATUS =====");
-    print("URL : $url");
-    print("STATUS : ${response.statusCode}");
-    print("BODY : ${response.body}");
-    print("=========================");
-
-    return response.statusCode == 200;
+    String status,
+    int idLamaranPekerjaan,
+  ) async {
+    await Future.delayed(const Duration(milliseconds: 150));
+    final index = _dummyHistory.indexWhere(
+        (element) => element['id_lamaran_pekerjaan'] == idLamaranPekerjaan);
+    if (index != -1) {
+      _dummyHistory[index]['status_lamaran'] = status;
+    }
+    return true;
   }
 }

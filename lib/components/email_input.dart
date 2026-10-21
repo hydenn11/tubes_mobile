@@ -6,7 +6,7 @@ class EmailInput extends StatelessWidget {
   final bool isEror;
   final String labelText;
   final String hintText;
-  final IconData prefixIcon;
+  final IconData? prefixIcon;
 
   const EmailInput({
     super.key,
@@ -14,7 +14,7 @@ class EmailInput extends StatelessWidget {
     required this.isEror,
     this.labelText = 'Email',
     this.hintText = 'nama@email.com',
-    this.prefixIcon = Icons.email_outlined,
+    this.prefixIcon,
   });
 
   @override
@@ -42,11 +42,13 @@ class EmailInput extends StatelessWidget {
         decoration: InputDecoration(
           filled: true,
           fillColor: const Color(0xFFF8FAFC),
-          prefixIcon: Icon(
-            prefixIcon,
-            size: 22,
-            color: isEror ? dangerColor : thirdColor,
-          ),
+          prefixIcon: prefixIcon != null
+              ? Icon(
+                  prefixIcon,
+                  size: 22,
+                  color: isEror ? dangerColor : thirdColor,
+                )
+              : null,
           labelText: labelText,
           hintText: hintText,
 

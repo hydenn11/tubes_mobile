@@ -4,11 +4,13 @@ import 'package:rekanpabrik/shared/shared.dart';
 class PassInput extends StatefulWidget {
   final TextEditingController controller;
   final bool isEror;
+  final IconData? prefixIcon;
 
   const PassInput({
     super.key,
     required this.controller,
     required this.isEror,
+    this.prefixIcon,
   });
 
   @override
@@ -43,11 +45,13 @@ class _PassInputState extends State<PassInput> {
         decoration: InputDecoration(
           filled: true,
           fillColor: const Color(0xFFF8FAFC),
-          prefixIcon: Icon(
-            Icons.lock_outline_rounded,
-            size: 22,
-            color: widget.isEror ? dangerColor : thirdColor,
-          ),
+          prefixIcon: widget.prefixIcon != null
+              ? Icon(
+                  widget.prefixIcon,
+                  size: 22,
+                  color: widget.isEror ? dangerColor : thirdColor,
+                )
+              : null,
           labelText: 'Password',
           hintText: 'Minimal 6 karakter',
           hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),

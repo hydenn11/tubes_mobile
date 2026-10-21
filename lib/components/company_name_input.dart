@@ -18,10 +18,6 @@ class companyname_input extends StatelessWidget {
     return TextField(
       controller: companyNameInputController, // Menghubungkan controller
       decoration: InputDecoration(
-        prefixIcon: Icon(
-          Icons.person,
-          size: 20,
-        ),
         labelText: label,
         labelStyle: TextStyle(
           color: greyColor,

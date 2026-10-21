@@ -41,10 +41,12 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/android/app/build/
+android/app/.cxx/
 
 .env
 .env.local
 .env.staging
-backend/.env
-backend/node_modules/
-backend/uploads/
+# Backend ignore
+backend/
+_backend_backup/

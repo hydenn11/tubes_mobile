@@ -1,53 +1,59 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:rekanpabrik/utils/api_url.dart';
 
 class meAPI {
-  final String apiUrl = getApiUrl();
+  final String apiUrl = 'dummy_mode';
 
   Future<Map<String, dynamic>> getUserProfile() async {
-    final url = Uri.parse('$apiUrl/auth/me');
-    final token = await getToken();
-    if (token == null) {
+    await Future.delayed(const Duration(milliseconds: 150));
+    final prefs = await SharedPreferences.getInstance();
+    final role = prefs.getString('user_role') ?? 'pelamar';
+    final email = prefs.getString('user_email') ?? (role == 'perusahaan' ? 'daffa@gmail.com' : 'rafif@gmail.com');
+    final name = prefs.getString('user_name') ?? (role == 'perusahaan' ? 'PT Nusantara Sejahtera' : 'Rafif Purnomo');
+
+    if (role == 'perusahaan' || role == 'hrd') {
       return {
-        'status': false,
-        'message': 'Token not found. Please log in again.',
+        'status': true,
+        'data': {
+          'id': 1,
+          'id_perusahaan': 1,
+          'role': 'perusahaan',
+          'nama': name,
+          'namaPerusahaanAsli': name,
+          'nama_perusahaan': name,
+          'email': email,
+          'alamat': 'Jl. Merdeka No. 1, Jakarta Pusat',
+          'about': 'PT Nusantara Sejahtera adalah perusahaan manufaktur dan distribusi terkemuka di Indonesia.',
+          'aboutMe': 'PT Nusantara Sejahtera adalah perusahaan manufaktur dan distribusi terkemuka di Indonesia.',
+          'about_me': 'PT Nusantara Sejahtera adalah perusahaan manufaktur dan distribusi terkemuka di Indonesia.',
+          'profile_pict': 'assets/img/logoRekanPabrik.png',
+          'img': 'assets/img/logoRekanPabrik.png',
+        }
       };
-    }
-
-    try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
-        return {
-          'status': true,
-          'data': jsonResponse['data'],
-        };
-      } else {
-        return {
-          'status': false,
-          'message': 'Failed to fetch user profile',
-        };
-      }
-    } catch (e) {
+    } else {
       return {
-        'status': false,
-        'message': 'Error: $e',
+        'status': true,
+        'data': {
+          'id': 1,
+          'id_pelamar': 1,
+          'role': 'pelamar',
+          'nama': name,
+          'first_name': name.split(' ').first,
+          'last_name': name.split(' ').length > 1 ? name.split(' ').sublist(1).join(' ') : 'Purnomo',
+          'email': email,
+          'alamat': 'Jl. Industri Manufaktur No. 10, Cikarang',
+          'phone': '081234567890',
+          'aboutMe': 'Operator produksi berpengalaman dengan sertifikasi K3.',
+          'about_me': 'Operator produksi berpengalaman dengan sertifikasi K3.',
+          'profile_pict': 'assets/img/defaultPict.png',
+          'img': 'assets/img/defaultPict.png',
+          'cv': 'CV_Rafif_Purnomo.pdf',
+        }
       };
     }
   }
 
   Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('auth_token');
+    return prefs.getString('auth_token') ?? 'dummy_token_12345';
   }
 }
