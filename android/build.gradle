@@ -5,6 +5,12 @@ allprojects {
     }
 }
 
+rootProject.buildDir = "../build"
+subprojects {
+    if (project.projectDir.toPath().getRoot().equals(rootProject.projectDir.toPath().getRoot())) {
+        project.buildDir = "${rootProject.buildDir}/${project.name}"
+    }
+}
 subprojects {
     project.evaluationDependsOn(":app")
 }

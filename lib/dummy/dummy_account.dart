@@ -1,23 +1,26 @@
 List<Map<String, dynamic>> dummyAccounts = [
   {
-    'firstName': 'rafif',
-    'lastName': 'purnomo',
+    'name': 'Rafif Purnomo',
     'email': 'rafif@gmail.com',
     'password': 'password123',
     'role': 'pelamar',
   },
   {
-    'firstName': 'albiyana',
-    'lastName': 'daffa',
-    'email': 'daffa@gmail.com',
-    'password': 'password456',
-    'role': 'HRD'
+    'name': 'Luthfi Ramadhan',
+    'email': 'luthfi@gmail.com',
+    'password': 'password123',
+    'role': 'pelamar',
   },
   {
-    'firstName': 'rakean',
-    'lastName': 'permana',
+    'name': 'Arvin',
+    'email': 'arvin@gmail.com',
+    'password': 'password123',
+    'role': 'HRD',
+  },
+  {
+    'name': 'Rakean Permana',
     'email': 'rakean@gmail.com',
     'password': 'password789',
-    'role': 'admin'
+    'role': 'admin',
   },
 ];

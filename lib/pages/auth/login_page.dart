@@ -115,9 +115,10 @@ class _loginPageState extends State<login_page> {
           children: [
             // Top Wave SVG
             Positioned(
-              top: topSafeArea,
+              top: 0,
               left: 0,
               right: 0,
+              height: 140 + topSafeArea,
               child: SvgPicture.string(
                 _topWaveSvg,
                 fit: BoxFit.fill,
@@ -166,28 +167,41 @@ class _loginPageState extends State<login_page> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const SizedBox(height: 10),
-                          const Text(
-                            "Selamat Datang",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'poppins',
-                              fontSize: 28,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.5,
+                          const SizedBox(height: 50),
+
+                          // Judul & Subtitle di area latar belakang putih (Center)
+                          Center(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Selamat Datang",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: darkMaroon,
+                                    fontFamily: 'poppins',
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                const Text(
+                                  "Masuk untuk melanjutkan dan mengelola akun RekanPabrik Anda.",
+                                  textAlign: TextAlign.center,
+                                  softWrap: true,
+                                  style: TextStyle(
+                                    color: Color(0xFF757575),
+                                    fontFamily: 'poppins',
+                                    fontSize: 13,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            "Masuk untuk melanjutkan dan mengelola akun RekanPabrik Anda.",
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.85),
-                              fontFamily: 'poppins',
-                              fontSize: 14,
-                              height: 1.5,
-                            ),
-                          ),
-                          const SizedBox(height: 66),
+
+                          const SizedBox(height: 24),
 
               // Form Inputs
               EmailInput(

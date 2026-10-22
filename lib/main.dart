@@ -3,7 +3,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:rekanpabrik/components/hrd_navbar_component.dart';
 import 'package:rekanpabrik/components/navbar_component.dart';
 import 'package:rekanpabrik/pages/page.dart';
-import 'package:rekanpabrik/pages/welcoming_text.dart';
 import 'package:rekanpabrik/shared/shared.dart';
 
 void main() async {
@@ -40,7 +39,6 @@ class MyApp extends StatelessWidget {
         '/cariPabrik': (context) => CariPabrik(),
         '/pageHRD': (context) => HRDnavbarComponent(),
         '/cekPelamar': (context) => Cekpelamar(),
-        '/splashScreen': (context) => SplashScreen(),
       },
     );
   }

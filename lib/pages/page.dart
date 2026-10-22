@@ -41,7 +41,6 @@ import 'package:rekanpabrik/components/search_bar_saved_jobs.dart';
 import 'package:rekanpabrik/shared/shared.dart';
 
 // UTILS
-import 'package:rekanpabrik/dummy/dummy_melamar_pekerjaan.dart';
 import 'package:rekanpabrik/dummy/dummy_perusahaan.dart';
 import 'package:rekanpabrik/utils/formatted_date.dart';
 

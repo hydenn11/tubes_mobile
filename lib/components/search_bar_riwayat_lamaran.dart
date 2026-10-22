@@ -4,7 +4,6 @@ import 'package:rekanpabrik/api/melamar_pekerjaan_api.dart';
 import 'package:rekanpabrik/models/melamar_pekerjaan.dart';
 import 'package:rekanpabrik/pages/page.dart';
 import 'package:rekanpabrik/shared/shared.dart';
-import 'package:rekanpabrik/dummy/dummy_melamar_pekerjaan.dart';
 import 'package:rekanpabrik/dummy/dummy_postingan_pekerjaan.dart';
 
 class searchBarRiwayatLamaran extends StatefulWidget {

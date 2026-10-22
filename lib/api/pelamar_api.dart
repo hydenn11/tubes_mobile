@@ -46,7 +46,8 @@ class Pelamarapi {
     await Future.delayed(const Duration(milliseconds: 200));
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('user_role', 'pelamar');
-    await prefs.setString('user_name', '$Fname $Lname');
+    final combinedName = Lname.isNotEmpty ? '$Fname $Lname' : Fname;
+    await prefs.setString('user_name', combinedName);
     await prefs.setString('user_email', email);
     await prefs.setString('auth_token', 'dummy_token_12345');
 

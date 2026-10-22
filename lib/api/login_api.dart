@@ -27,7 +27,7 @@ class LoginAPI {
     if (match.isNotEmpty) {
       role = match['role']?.toString().toLowerCase() == 'hrd' ? 'perusahaan' : 'pelamar';
       finalEmail = match['email'] ?? email;
-      name = "${match['firstName'] ?? ''} ${match['lastName'] ?? ''}".trim();
+      name = (match['name'] ?? "${match['firstName'] ?? ''} ${match['lastName'] ?? ''}").toString().trim();
     } else {
       // Fallback ramah pengguna: jika input mengandung kata 'hrd' -> perusahaan, selain itu pelamar
       if (cleanEmail.contains('hrd') || cleanEmail.contains('company') || cleanEmail.contains('daffa')) {
