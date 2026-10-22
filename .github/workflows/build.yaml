@@ -41,7 +41,7 @@ jobs:
 
       - name: Generate SonarQube Properties
         run: |
-          echo "sonar.projectKey=RekanPabrik_MOBILE-RekanPabrik" > sonar-project.properties
+          echo "sonar.projectKey=hydenn11_tubes_mobile" > sonar-project.properties
           echo "sonar.organization=hydenn11" >> sonar-project.properties
           echo "sonar.host.url=https://sonarcloud.io" >> sonar-project.properties
           echo "sonar.sources=lib" >> sonar-project.properties
