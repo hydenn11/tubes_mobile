@@ -13,18 +13,16 @@ class Resetpasspelamar extends StatefulWidget {
 
 class _ResetpasspelamarState extends State<Resetpasspelamar> {
   final TextEditingController newPasswordController = TextEditingController();
-  final TextEditingController ConfirmNewpasswordController =
+  final TextEditingController confirmNewPasswordController =
       TextEditingController();
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
-  bool passIsEror = false;
-  bool newPassIsEror = false;
-  bool ConfirmNewpassIsEror = false;
-  bool _obscureText = true;
-  bool isLoading = false;
+  bool _obscureNewPass = true;
+  bool _obscureConfirmPass = true;
   String errMassage = '';
   var user;
 
+  @override
   void initState() {
     super.initState();
     initUser();
@@ -32,15 +30,15 @@ class _ResetpasspelamarState extends State<Resetpasspelamar> {
   }
 
   Future<void> initUser() async {
-    var response = await meAPI().getUserProfile();
-
-    if (response['status'] == true && response['data'] != null) {
-      setState(() {
-        user = response['data'];
-      });
-    } else {
-      print("Failed to retrieve user data: ${response['message']}");
-    }
+    try {
+      var response = await meAPI().getUserProfile();
+      if (response['status'] == true && response['data'] != null) {
+        if (!mounted) return;
+        setState(() {
+          user = response['data'];
+        });
+      }
+    } catch (_) {}
   }
 
   void _initializeNotifications() async {
@@ -73,52 +71,82 @@ class _ResetpasspelamarState extends State<Resetpasspelamar> {
     await flutterLocalNotificationsPlugin.show(
       0,
       'Reset Password Berhasil',
-      'Password Anda telah berhasil diubah!, Gunakan password baru anda untuk login',
+      'Password Anda telah berhasil diubah! Gunakan password baru Anda untuk login.',
       platformChannelSpecifics,
     );
   }
 
-  void resetPass(String newPass, String confirmNewPass) async {
+  void resetPass(String newPass, String confirmNewPass) {
     setState(() {
-      passIsEror = false;
-      newPassIsEror = false;
-      ConfirmNewpassIsEror = false;
       errMassage = '';
-
-      if (newPass.isNotEmpty && confirmNewPass.isNotEmpty) {
-        if (newPass == confirmNewPass) {
-          _showConfirmationDialog(context, newPass, confirmNewPass);
-        } else {
-          newPassIsEror = true;
-          ConfirmNewpassIsEror = true;
-          errMassage = 'Password baru anda tidak sesuai';
-        }
-      } else {
-        passIsEror = true;
-        newPassIsEror = true;
-        ConfirmNewpassIsEror = true;
-        errMassage = 'Semua Inputan Harus Terisi';
-      }
     });
+
+    if (newPass.isEmpty || confirmNewPass.isEmpty) {
+      setState(() {
+        errMassage = 'Semua kolom kata sandi wajib diisi.';
+      });
+      return;
+    }
+
+    if (newPass.length < 6) {
+      setState(() {
+        errMassage = 'Kata sandi minimal 6 karakter.';
+      });
+      return;
+    }
+
+    if (newPass != confirmNewPass) {
+      setState(() {
+        errMassage = 'Konfirmasi kata sandi tidak cocok.';
+      });
+      return;
+    }
+
+    _showConfirmationDialog(context, newPass);
   }
 
-  void _showConfirmationDialog(
-      BuildContext parentContext, String newPass, String confirmNewPass) {
+  void _showConfirmationDialog(BuildContext parentContext, String newPass) {
     showDialog(
       context: parentContext,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Konfirmasi'),
-          content: const Text('Apakah Anda yakin ingin mengubah password?'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            'Konfirmasi',
+            style: TextStyle(
+              fontFamily: 'poppins',
+              fontWeight: FontWeight.bold,
+              color: blackColor,
+            ),
+          ),
+          content: const Text(
+            'Apakah Anda yakin ingin memperbarui kata sandi akun ini?',
+            style: TextStyle(fontFamily: 'poppins', fontSize: 13),
+          ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Batal'),
+              child: const Text(
+                'Batal',
+                style: TextStyle(fontFamily: 'poppins', color: Colors.grey),
+              ),
               onPressed: () {
                 Navigator.of(dialogContext).pop();
               },
             ),
-            TextButton(
-              child: const Text('Ya'),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: darkMaroon,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                'Ya, Ubah',
+                style: TextStyle(fontFamily: 'poppins'),
+              ),
               onPressed: () async {
                 Navigator.of(dialogContext).pop();
                 showLoadingDialog(parentContext);
@@ -130,7 +158,12 @@ class _ResetpasspelamarState extends State<Resetpasspelamar> {
 
                 if (success) {
                   showPasswordResetNotification();
-                  Navigator.pushNamed(context, '/pagePelamar');
+                  ScaffoldMessenger.of(parentContext).showSnackBar(
+                    const SnackBar(
+                      content: Text('Password berhasil diperbarui!'),
+                    ),
+                  );
+                  Navigator.pop(parentContext);
                 } else {
                   ScaffoldMessenger.of(parentContext).showSnackBar(
                     const SnackBar(content: Text('Gagal mengubah password.')),
@@ -145,16 +178,12 @@ class _ResetpasspelamarState extends State<Resetpasspelamar> {
   }
 
   Future<bool> _updatePassword(String newPassword) async {
+    final int id = user != null ? (user['id_pelamar'] ?? 1) : 1;
     final bool success = await Pelamarapi().changePassword(
-      idpelamar: user['id_pelamar'],
+      idpelamar: id,
       newPassword: newPassword,
     );
-
-    if (success) {
-      return true;
-    } else {
-      return false;
-    }
+    return success;
   }
 
   void showLoadingDialog(BuildContext context) {
@@ -162,149 +191,190 @@ class _ResetpasspelamarState extends State<Resetpasspelamar> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return const Center(
-          child: CircularProgressIndicator(),
+        return Center(
+          child: CircularProgressIndicator(color: darkMaroon),
         );
       },
+    );
+  }
+
+  InputDecoration _buildInputDecoration({
+    required String label,
+    required bool obscureText,
+    required VoidCallback onToggle,
+  }) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(
+        fontFamily: 'poppins',
+        fontSize: 13,
+        color: Color(0xFF64748B),
+      ),
+      prefixIcon: const Icon(
+        Icons.lock_outline_rounded,
+        size: 20,
+        color: Color(0xFF64748B),
+      ),
+      suffixIcon: IconButton(
+        icon: Icon(
+          obscureText
+              ? Icons.visibility_outlined
+              : Icons.visibility_off_outlined,
+          size: 20,
+          color: const Color(0xFF64748B),
+        ),
+        onPressed: onToggle,
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: darkMaroon, width: 1.5),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: primaryColor,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Reset Password'),
-        centerTitle: true,
+        elevation: 0,
+        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: blackColor,
+            size: 20,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          "Ganti Password",
+          style: TextStyle(
+            fontFamily: 'poppins',
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: blackColor,
+          ),
+        ),
       ),
       body: SafeArea(
-          bottom: false,
-          child: ListView(
-            padding: EdgeInsets.symmetric(horizontal: 30),
-            children: [
-              SizedBox(
-                height: 50,
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          children: [
+            Text(
+              "Buat Password Baru",
+              style: TextStyle(
+                fontFamily: 'poppins',
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: blackColor,
               ),
-              TextField(
-                controller: newPasswordController, // Menghubungkan controller
-                obscureText: _obscureText,
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.lock, size: 20),
-                  labelText: 'Password Baru',
-                  labelStyle: TextStyle(color: greyColor),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide(
-                        color: newPassIsEror ? Colors.red : thirdColor,
-                        width: 2.0),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide(
-                        color: newPassIsEror ? Colors.red : thirdColor,
-                        width: 2.0),
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                        _obscureText ? Icons.visibility : Icons.visibility_off),
-                    onPressed: () {
-                      setState(() {
-                        _obscureText =
-                            !_obscureText;
-                      });
-                    },
-                  ),
-                ),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              "Masukkan kata sandi baru untuk mengamankan akun Anda. Pastikan kedua kolom terisi sama.",
+              style: TextStyle(
+                fontFamily: 'poppins',
+                fontSize: 13,
+                color: Color(0xFF64748B),
+                height: 1.4,
               ),
-              if (errMassage.isNotEmpty)
-                Text(
-                  errMassage,
-                  style: TextStyle(color: Colors.red),
-                ),
-              SizedBox(
-                height: 20,
-              ),
-              TextField(
-                controller: ConfirmNewpasswordController,
-                obscureText: _obscureText,
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.lock, size: 20),
-                  labelText: 'Konfirmasi Password',
-                  labelStyle: TextStyle(color: greyColor),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide(
-                        color: ConfirmNewpassIsEror ? Colors.red : thirdColor,
-                        width: 2.0),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide(
-                        color: ConfirmNewpassIsEror ? Colors.red : thirdColor,
-                        width: 2.0),
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                        _obscureText ? Icons.visibility : Icons.visibility_off),
-                    onPressed: () {
-                      setState(() {
-                        _obscureText =
-                            !_obscureText;
-                      });
-                    },
-                  ),
-                ),
-              ),
-              if (errMassage.isNotEmpty)
-                Text(
-                  errMassage,
-                  style: TextStyle(color: Colors.red),
-                ),
-              SizedBox(
-                height: 20,
-              ),
-              Container(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        String newPass = newPasswordController.text;
-                        String confirmNewPass =
-                            ConfirmNewpasswordController.text;
+            ),
+            const SizedBox(height: 24),
 
-                        resetPass(newPass, confirmNewPass);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: thirdColor,
-                        padding: EdgeInsets.symmetric(
-                          vertical: 10,
-                          horizontal: 50,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: Text(
-                        'Ubah Password',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: primaryColor,
-                          fontFamily: 'poppins',
-                        ),
+            TextField(
+              controller: newPasswordController,
+              obscureText: _obscureNewPass,
+              style: const TextStyle(fontFamily: 'poppins', fontSize: 14),
+              decoration: _buildInputDecoration(
+                label: 'Password Baru',
+                obscureText: _obscureNewPass,
+                onToggle: () {
+                  setState(() {
+                    _obscureNewPass = !_obscureNewPass;
+                  });
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            TextField(
+              controller: confirmNewPasswordController,
+              obscureText: _obscureConfirmPass,
+              style: const TextStyle(fontFamily: 'poppins', fontSize: 14),
+              decoration: _buildInputDecoration(
+                label: 'Konfirmasi Password Baru',
+                obscureText: _obscureConfirmPass,
+                onToggle: () {
+                  setState(() {
+                    _obscureConfirmPass = !_obscureConfirmPass;
+                  });
+                },
+              ),
+            ),
+
+            if (errMassage.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Icon(Icons.error_outline_rounded,
+                      size: 15, color: dangerColor),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      errMassage,
+                      style: TextStyle(
+                        fontFamily: 'poppins',
+                        fontSize: 12,
+                        color: dangerColor,
                       ),
                     ),
-                  ],
-                ),
-              )
+                  ),
+                ],
+              ),
             ],
-          )),
+
+            const SizedBox(height: 30),
+
+            SizedBox(
+              height: 48,
+              child: ElevatedButton(
+                onPressed: () {
+                  resetPass(
+                    newPasswordController.text.trim(),
+                    confirmNewPasswordController.text.trim(),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: darkMaroon,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  'Simpan Password Baru',
+                  style: TextStyle(
+                    fontFamily: 'poppins',
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

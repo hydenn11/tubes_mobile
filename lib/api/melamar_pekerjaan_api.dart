@@ -92,14 +92,32 @@ class MelamarPekerjaanapi {
   Future<Map<String, dynamic>> getDetailPostinganByIdPostingan(
       int idPostingan) async {
     await Future.delayed(const Duration(milliseconds: 100));
+
+    final history = _dummyHistory.firstWhere(
+      (element) => element['id_lamaran_pekerjaan'] == idPostingan,
+      orElse: () => _dummyHistory.isNotEmpty
+          ? _dummyHistory.first
+          : {
+              'id_lamaran_pekerjaan': idPostingan,
+              'nama_perusahaan': 'PT Astra Otoparts Tbk',
+              'posisi': 'Operator Produksi (Assembly)',
+              'status_lamaran': 'diproses',
+              'status': 'diproses',
+              'createdAt': DateTime.now().toIso8601String(),
+              'first_name': 'Rafif',
+              'last_name': 'Purnomo',
+            },
+    );
+
     return {
-      'id_post_pekerjaan': idPostingan,
-      'posisi': 'Software Engineer',
-      'nama_perusahaan': 'PT Nusantara Sejahtera',
-      'status': 'tersedia',
-      'lokasi': 'Jakarta',
-      'job_details': 'Mengembangkan aplikasi berbasis mobile dan web.',
-      'requirements': 'Pengalaman minimal 1 tahun.',
+      'id_lamaran_pekerjaan': history['id_lamaran_pekerjaan'] ?? idPostingan,
+      'nama_perusahaan': history['nama_perusahaan'] ?? 'PT Rekan Pabrik',
+      'posisi': history['posisi'] ?? 'Operator Produksi',
+      'status': history['status_lamaran'] ?? history['status'] ?? 'diproses',
+      'status_lamaran': history['status_lamaran'] ?? history['status'] ?? 'diproses',
+      'createdAt': history['createdAt'] ?? DateTime.now().toIso8601String(),
+      'first_name': history['first_name'] ?? 'Rafif',
+      'last_name': history['last_name'] ?? 'Purnomo',
     };
   }
 

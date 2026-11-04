@@ -64,7 +64,6 @@ class _riwayatLamaranState extends State<riwayatLamaran> {
       backgroundColor: const Color(0xFFF8FAFC),
       body: Column(
         children: [
-          // 1. TOP HEADER (BRAND DARK MAROON DENGAN WATERMARK TAS KERJA)
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
@@ -81,7 +80,6 @@ class _riwayatLamaranState extends State<riwayatLamaran> {
               bottom: false,
               child: Stack(
                 children: [
-                  // Siluet Watermark Tas Kerja / Briefcase
                   Positioned(
                     right: 12,
                     top: 10,
@@ -95,13 +93,11 @@ class _riwayatLamaranState extends State<riwayatLamaran> {
                     ),
                   ),
 
-                  // Konten Header
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Tombol Kembali (Hanya tampil jika ditekan dari "Riwayat Lengkap" di Beranda)
                         if (showBack) ...[
                           IconButton(
                             icon: const Icon(
@@ -117,7 +113,6 @@ class _riwayatLamaranState extends State<riwayatLamaran> {
                         ] else
                           const SizedBox(height: 10),
 
-                        // Judul Lamaran Anda (Multi-line bold)
                         const Text(
                           "Lamaran\nAnda",
                           style: TextStyle(
@@ -137,7 +132,6 @@ class _riwayatLamaranState extends State<riwayatLamaran> {
             ),
           ),
 
-          // 2. TAB BAR (DIPROSES, DITERIMA, DITOLAK TERPISAH DENGAN INDIKATOR AKTIF)
           Container(
             decoration: const BoxDecoration(
               color: Colors.white,
@@ -157,7 +151,6 @@ class _riwayatLamaranState extends State<riwayatLamaran> {
             ),
           ),
 
-          // 3. TAB CONTENT (LISTVIEW KARTU LAMARAN)
           Expanded(
             child: _isLoading
                 ? Center(
@@ -172,7 +165,6 @@ class _riwayatLamaranState extends State<riwayatLamaran> {
     );
   }
 
-  // BUILDER TOMBOL TAB DENGAN INDIKATOR GARIS BAWAH
   Widget _buildTabButton(int index, String title) {
     final bool isSelected = _selectedTabIndex == index;
 
@@ -215,7 +207,6 @@ class _riwayatLamaranState extends State<riwayatLamaran> {
     );
   }
 
-  // CONTENT SESUAI TAB YANG AKTIF
   Widget _buildActiveTabContent() {
     switch (_selectedTabIndex) {
       case 0:
@@ -243,7 +234,6 @@ class _riwayatLamaranState extends State<riwayatLamaran> {
     }
   }
 
-  // BUILDER LIST LAMARAN PER TAB
   Widget _buildApplicationList({
     required List<Map<String, dynamic>> items,
     required Color accentColor,
@@ -313,7 +303,6 @@ class _riwayatLamaranState extends State<riwayatLamaran> {
     );
   }
 
-  // BUILDER KARTU LAMARAN PERSIS SEPERTI GAMBAR
   Widget _buildApplicationCard({
     required Map<String, dynamic> item,
     required Color accentColor,
@@ -324,7 +313,6 @@ class _riwayatLamaranState extends State<riwayatLamaran> {
     final String posisi = (item['posisi'] ?? 'Operator Produksi').toString();
     final int idLamaran = item['id_lamaran_pekerjaan'] ?? 1;
 
-    // Nama singkatan untuk logo avatar
     final String shortName = companyName
         .replaceAll('PT ', '')
         .replaceAll(' Tbk', '')
@@ -363,7 +351,6 @@ class _riwayatLamaranState extends State<riwayatLamaran> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // 1. GARIS STATUS VERTIKAL
               Container(
                 width: 4.5,
                 height: 44,
@@ -375,7 +362,6 @@ class _riwayatLamaranState extends State<riwayatLamaran> {
 
               const SizedBox(width: 14),
 
-              // 2. KOTAK LOGO / AVATAR PERUSAHAAN
               Container(
                 width: 64,
                 height: 44,
@@ -408,7 +394,6 @@ class _riwayatLamaranState extends State<riwayatLamaran> {
 
               const SizedBox(width: 14),
 
-              // 3. INFORMASI STATUS & PERUSAHAAN
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

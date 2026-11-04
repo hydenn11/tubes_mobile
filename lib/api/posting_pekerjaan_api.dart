@@ -58,7 +58,6 @@ class Postingpekerjaanapi {
     String requirements,
   ) async {
     await Future.delayed(const Duration(milliseconds: 200));
-    // Menambahkan secara lokal ke list
     dummyPostPekerjaan.insert(0, {
       'id_post_pekerjaan': dummyPostPekerjaan.length + 1,
       'id_perusahaan': idPerusahaan,

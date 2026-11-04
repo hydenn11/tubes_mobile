@@ -75,7 +75,6 @@ class _HomepagehrdState extends State<Homepagehrd> {
               child: Container(
                 width: 350,
                 height: 120,
-                // Sesuaikan tinggi untuk menampung teks tambahan
                 decoration: BoxDecoration(
                   color: thirdColor,
                   borderRadius: BorderRadius.circular(20),
@@ -92,7 +91,6 @@ class _HomepagehrdState extends State<Homepagehrd> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Membuat kolom di sebelah kiri untuk teks "Welcome" dan nama user
                     Column(
                       crossAxisAlignment:
                           CrossAxisAlignment.start, // Agar teks rata kiri
@@ -123,7 +121,6 @@ class _HomepagehrdState extends State<Homepagehrd> {
                         ),
                       ],
                     ),
-                    // Avatar berada di kanan
                     CircleAvatar(
                       radius: 40,
                       backgroundColor: Colors.grey[200],
@@ -162,7 +159,6 @@ class _HomepagehrdState extends State<Homepagehrd> {
               ),
               child: Column(
                 children: [
-                  // Foto di dalam container
                   ClipRRect(
                     borderRadius: BorderRadius.circular(
                         8), // Membuat foto berbentuk rounded
@@ -174,7 +170,6 @@ class _HomepagehrdState extends State<Homepagehrd> {
                     ),
                   ),
                   SizedBox(height: 30), // Jarak antara foto dan teks
-                  // Tulisan di bawah foto
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Container(
@@ -261,7 +256,6 @@ class _HomepagehrdState extends State<Homepagehrd> {
               ),
               child: Column(
                 children: [
-                  // Foto di dalam container
                   ClipRRect(
                     borderRadius: BorderRadius.circular(
                         8), // Membuat foto berbentuk rounded
@@ -273,7 +267,6 @@ class _HomepagehrdState extends State<Homepagehrd> {
                     ),
                   ),
                   SizedBox(height: 30), // Jarak antara foto dan teks
-                  // Tulisan di bawah foto
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Container(

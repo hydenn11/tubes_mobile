@@ -13,8 +13,9 @@ class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController aboutMeController = TextEditingController();
 
-  String defaultFotoIMG = 'assets/img/defaultPict.png';
+  final String defaultFotoIMG = 'assets/img/defaultPict.png';
   String cvStatus = '';
+  String? cvFileName;
   Uri? _cvURL;
   var user;
   bool isLoading = true;
@@ -41,36 +42,37 @@ class _ProfilePageState extends State<ProfilePage> {
           final about = user['about_me'] ?? user['aboutMe'] ?? '';
           aboutMeController.text = about.toString();
           emailController.text = (user['email'] ?? '').toString();
-          final cv = user['curriculum_vitae'] ?? user['cv_path'];
+          final rawCv = (user['cv'] ?? user['curriculum_vitae'] ?? user['cv_path'])?.toString();
 
-          if (cv != null && cv.toString().isNotEmpty) {
-            _cvURL = Uri.parse(cv.toString());
-
+          if (rawCv != null && rawCv.isNotEmpty) {
+            _cvURL = Uri.tryParse(rawCv);
+            cvFileName = rawCv.split(RegExp(r'[\\/]')).last;
             cvStatus = "CV telah diunggah.";
           } else {
             _cvURL = null;
-
-            cvStatus = "Anda belum mengupload CV";
+            cvFileName = null;
+            cvStatus = "Anda belum mengupload CV.";
           }
-          print("===== USER PROFILE =====");
-          print(response);
-          print("========================");
         });
       } else {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content:
-                  Text("Gagal memuat data pengguna: ${response['message']}")),
+            content: Text("Gagal memuat data: ${response['message']}"),
+          ),
         );
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error memuat data pengguna: $e")),
+        SnackBar(content: Text("Error: $e")),
       );
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
@@ -80,29 +82,36 @@ class _ProfilePageState extends State<ProfilePage> {
         bool canLaunch = await canLaunchUrl(_cvURL!);
         if (canLaunch) {
           await launchUrl(_cvURL!, mode: LaunchMode.externalApplication);
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Mengunduh CV...')),
+            const SnackBar(content: Text('Membuka CV...')),
           );
         } else {
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('Tidak ada aplikasi untuk membuka URL ini.')),
+            const SnackBar(content: Text('Tidak dapat membuka file CV.')),
           );
         }
       } catch (e) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Gagal membuka CV: $e')),
         );
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('CV TIDAK ADA...')),
+        const SnackBar(content: Text('CV belum tersedia.')),
       );
     }
   }
 
-  Future<void> saveProfile(int idPelamar, String firstname, String lastname,
-      String email, String aboutme) async {
+  Future<void> saveProfile(
+    int idPelamar,
+    String firstname,
+    String lastname,
+    String email,
+    String aboutme,
+  ) async {
     if (firstname.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -123,11 +132,12 @@ class _ProfilePageState extends State<ProfilePage> {
     }
     try {
       bool status = await Pelamarapi().updateDataPelamar(
-          idpelamar: idPelamar,
-          firstname: firstname.trim(),
-          lastname: lastname.trim(),
-          email: email.trim(),
-          aboutme: aboutme.trim());
+        idpelamar: idPelamar,
+        firstname: firstname.trim(),
+        lastname: lastname.trim(),
+        email: email.trim(),
+        aboutme: aboutme.trim(),
+      );
 
       if (status) {
         await initUser();
@@ -138,13 +148,13 @@ class _ProfilePageState extends State<ProfilePage> {
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Gagal memperbarui Profil')),
+          const SnackBar(content: Text('Gagal memperbarui profil.')),
         );
       }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error memperbarui Profil')),
+        const SnackBar(content: Text('Error memperbarui profil.')),
       );
     }
   }
@@ -153,241 +163,336 @@ class _ProfilePageState extends State<ProfilePage> {
     bool result = await LoginAPI().logout();
     if (result) {
       if (!mounted) return;
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        '/',
-        (route) => false, // Kembali ke menu awal dan hapus stack sebelumnya
-      );
+      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Anda sudah log out")),
+        const SnackBar(content: Text("Anda sudah keluar.")),
       );
     } else {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Logout failed")),
+        const SnackBar(content: Text("Gagal keluar akun.")),
       );
     }
+  }
+
+  InputDecoration _inputDeco(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(
+        fontFamily: 'poppins',
+        fontSize: 13,
+        color: Color(0xFF64748B),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: darkMaroon, width: 1.5),
+      ),
+    );
+  }
+
+  ImageProvider? _getAvatarImage(String? path) {
+    if (path == null || path.isEmpty) return null;
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return NetworkImage(path);
+    }
+    if (path.startsWith('assets/')) {
+      return AssetImage(path);
+    }
+    final file = File(path);
+    if (file.existsSync()) {
+      return FileImage(file);
+    }
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
       return Scaffold(
+        backgroundColor: Colors.white,
         body: Center(
-          child: CircularProgressIndicator(
-            color: thirdColor,
-          ),
+          child: CircularProgressIndicator(color: darkMaroon),
         ),
       );
     }
 
+    final bool hasCV = cvFileName != null && cvFileName!.isNotEmpty;
+
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         elevation: 0,
-        shadowColor: Colors.transparent,
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         scrolledUnderElevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(color: Colors.transparent),
+        title: Text(
+          "Profil Saya",
+          style: TextStyle(
+            fontFamily: 'poppins',
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: blackColor,
+          ),
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.support_agent_rounded, color: darkMaroon),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const Pengaduan()),
+              );
+            },
+          ),
+        ],
       ),
-      backgroundColor: primaryColor,
       body: SafeArea(
-        bottom: true,
         child: ListView(
-          padding: EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           children: [
-            const SizedBox(height: 30),
-            CircleAvatar(
-              radius: 80,
-              backgroundColor: Colors.grey[200],
-              backgroundImage: (user['profile_pict'] != null &&
-                      user['profile_pict'].toString().isNotEmpty)
-                  ? NetworkImage(
-                      user['profile_pict'],
-                    )
-                  : null,
-              child:
-                  (user['profile_pict'] == null || user['profile_pict'].isEmpty)
-                      ? Icon(
-                          Icons.person,
-                          size: 80,
-                          color: Colors.grey,
-                        )
-                      : null,
-            ),
+            const SizedBox(height: 10),
 
-            const SizedBox(height: 20),
-            InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ChangeProfilePagePelamar(),
-                  ),
-                );
-                initUser();
-              },
-              child: CircleAvatar(
-                radius: 20,
-                backgroundColor: Colors.grey,
-                child: const Icon(
-                  Icons.camera_alt,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Input Fields
-            TextField(
-              controller: firstNameController,
-              decoration: const InputDecoration(
-                labelText: "Nama Depan",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: lastNameController,
-              decoration: const InputDecoration(
-                labelText: "Nama Belakang",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                labelText: "Email",
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: aboutMeController,
-              decoration: const InputDecoration(
-                labelText: "Tentang Saya",
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 20),
-
-            // CV Section
-            Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 2),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
+            Center(
+              child: Stack(
                 children: [
-                  Text(
-                    cvStatus,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: cvStatus == "Anda belum mengupload CV"
-                          ? Colors.red
-                          : Colors.black,
-                    ),
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: const Color(0xFFF1F5F9),
+                    backgroundImage: _getAvatarImage(user?['profile_pict']?.toString()),
+                    child: _getAvatarImage(user?['profile_pict']?.toString()) == null
+                        ? const Icon(
+                            Icons.person,
+                            size: 50,
+                            color: Colors.grey,
+                          )
+                        : null,
                   ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: _launchCV,
-                        icon: const Icon(Icons.download),
-                        label: const Text("Unduh CV"),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: InkWell(
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ChangeProfilePagePelamar(),
+                          ),
+                        );
+                        initUser();
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: darkMaroon,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          size: 14,
+                          color: Colors.white,
+                        ),
                       ),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const UploadCv(),
-                            ),
-                          );
-                          initUser();
-                        },
-                        icon: const Icon(Icons.upload_file),
-                        label: const Text("Upload CV Baru"),
-                      ),
-                    ],
+                    ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
-            // Save Button
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: dangerColor),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const Resetpasspelamar(),
+            TextField(
+              controller: firstNameController,
+              style: const TextStyle(fontFamily: 'poppins', fontSize: 14),
+              decoration: _inputDeco("Nama Depan"),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: lastNameController,
+              style: const TextStyle(fontFamily: 'poppins', fontSize: 14),
+              decoration: _inputDeco("Nama Belakang"),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: emailController,
+              keyboardType: TextInputType.emailAddress,
+              style: const TextStyle(fontFamily: 'poppins', fontSize: 14),
+              decoration: _inputDeco("Email"),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: aboutMeController,
+              maxLines: 3,
+              style: const TextStyle(fontFamily: 'poppins', fontSize: 14),
+              decoration: _inputDeco("Tentang Saya"),
+            ),
+
+            const SizedBox(height: 14),
+
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFFCBD5E1)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "CV",
+                          style: TextStyle(
+                            fontFamily: 'poppins',
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          hasCV ? cvFileName! : "Belum mengunggah CV",
+                          style: TextStyle(
+                            fontFamily: 'poppins',
+                            fontSize: 11.5,
+                            fontWeight: hasCV ? FontWeight.w500 : FontWeight.normal,
+                            color: hasCV ? blackColor : const Color(0xFF64748B),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const UploadCv(),
+                        ),
+                      );
+                      initUser();
+                    },
+                    child: Text(
+                      hasCV ? "Ubah" : "Upload",
+                      style: TextStyle(
+                        fontFamily: 'poppins',
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: darkMaroon,
                       ),
-                    );
-                  },
-                  child: Text(
-                    "Reset Password",
-                    style: TextStyle(
-                        color: primaryColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15),
+                    ),
                   ),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: succesColor),
-                  onPressed: () {
-                    int idpelamar = user['id_pelamar'];
-                    saveProfile(
-                      idpelamar,
-                      firstNameController.text,
-                      lastNameController.text,
-                      emailController.text,
-                      aboutMeController.text,
-                    );
-                  },
-                  child: Text(
-                    "Simpan Perubahan",
-                    style: TextStyle(
-                        color: primaryColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 50,
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: dangerColor),
-              onPressed: () {
-                logout();
-              },
-              child: Text(
-                "Log Out",
-                style: TextStyle(
-                    color: primaryColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15),
+                ],
               ),
             ),
-            SizedBox(
-              height: 200,
+
+            const SizedBox(height: 14),
+
+            InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const Resetpasspelamar(),
+                  ),
+                );
+              },
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFCBD5E1)),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        "Ganti Password",
+                        style: TextStyle(
+                          fontFamily: 'poppins',
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: blackColor,
+                        ),
+                      ),
+                    ),
+                    const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 13,
+                      color: Color(0xFF94A3B8),
+                    ),
+                  ],
+                ),
+              ),
             ),
+
+            const SizedBox(height: 20),
+
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: () {
+                  final int idpelamar = user['id_pelamar'] ?? 1;
+                  saveProfile(
+                    idpelamar,
+                    firstNameController.text,
+                    lastNameController.text,
+                    emailController.text,
+                    aboutMeController.text,
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: darkMaroon,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  "Simpan Perubahan",
+                  style: TextStyle(
+                    fontFamily: 'poppins',
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: TextButton(
+                onPressed: logout,
+                child: Text(
+                  "Keluar",
+                  style: TextStyle(
+                    fontFamily: 'poppins',
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: dangerColor,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
           ],
         ),
       ),

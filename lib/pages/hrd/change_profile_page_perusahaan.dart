@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:rekanpabrik/api/me_api.dart';
 import 'package:rekanpabrik/api/perusahaan_api.dart';
 import 'package:rekanpabrik/shared/shared.dart';
@@ -19,7 +18,6 @@ class Changeprofilepageperusahaan extends StatefulWidget {
 class _ChangeprofilepageperusahaanState
     extends State<Changeprofilepageperusahaan> {
   final meAPI meapi = meAPI();
-  final PerusahaanAPI perusahaanapi = PerusahaanAPI();
   var user;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -50,8 +48,8 @@ class _ChangeprofilepageperusahaanState
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
       'profile_picture_channel',
-      'Profile picture Update Notifications',
-      channelDescription: 'Notifications for profile picture updates',
+      'Notifikasi Logo Perusahaan',
+      channelDescription: 'Notifikasi saat logo perusahaan berhasil diperbarui',
       importance: Importance.high,
       priority: Priority.high,
       ticker: 'ticker',
@@ -63,8 +61,8 @@ class _ChangeprofilepageperusahaanState
 
     await flutterLocalNotificationsPlugin.show(
       0,
-      'Foto Profil Diperbarui',
-      'Foto profil Anda telah berhasil diperbarui.',
+      'Logo Perusahaan Diperbarui',
+      'Logo perusahaan Anda telah berhasil diperbarui!',
       platformChannelSpecifics,
     );
   }
@@ -73,18 +71,19 @@ class _ChangeprofilepageperusahaanState
     try {
       var response = await meapi.getUserProfile();
       if (response['status'] == true && response['data'] != null) {
+        if (!mounted) return;
         setState(() {
           user = response['data'];
           isLoading = false;
         });
       } else {
-        print("Failed to retrieve user data: ${response['message']}");
+        if (!mounted) return;
         setState(() {
           isLoading = false;
         });
       }
-    } catch (e) {
-      print("Error fetching user data: $e");
+    } catch (_) {
+      if (!mounted) return;
       setState(() {
         isLoading = false;
       });
@@ -92,84 +91,111 @@ class _ChangeprofilepageperusahaanState
   }
 
   Future<void> pickImage(ImageSource source) async {
-    if (source == ImageSource.camera &&
-        !(await Permission.camera.request().isGranted)) {
-      openAppSettings();
-      print("Izin kamera ditolak!");
-      return;
-    }
-
-    if (source == ImageSource.gallery &&
-        !(await Permission.photos.request().isGranted)) {
-      openAppSettings();
-      print("Izin Galeri Foto ditolak!");
-      return;
-    }
-
     try {
-      final pickedImage = await ImagePicker().pickImage(source: source);
+      final pickedImage = await ImagePicker().pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
       if (pickedImage != null) {
         setState(() {
           selectedImage = File(pickedImage.path);
         });
       }
     } catch (e) {
-      print("Error picking image: $e");
+      debugPrint("Error picking image: $e");
     }
   }
 
-  Future<void> _updateProfileData(File selectedImage, int idUser) async {
+  Future<void> _updateProfileData(File imageFile, int idUser) async {
     setState(() {
       isUploading = true;
     });
     try {
-      var response = await perusahaanapi.updateProfilePicture(
-          idperusahaan: idUser, imagePath: selectedImage);
-
-      if (response) {
-        showProfileUpdatedNotification();
-        Navigator.pushNamed(context, '/pageHRD');
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal memperbarui foto: ${response}')),
-        );
-      }
-    } catch (e) {
-      print("Error updating profile picture: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Terjadi kesalahan saat mengunggah foto.')),
+      var response = await PerusahaanAPI().updateProfilePicture(
+        idperusahaan: idUser,
+        imagePath: imageFile,
       );
-    } finally {
+
+      if (!mounted) return;
       setState(() {
         isUploading = false;
       });
+
+      if (response) {
+        showProfileUpdatedNotification();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Logo perusahaan berhasil diperbarui!')),
+        );
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Gagal memperbarui logo. Silakan coba lagi.'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        isUploading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Terjadi kesalahan: $e')),
+      );
     }
   }
 
   void showImageSourceDialog() {
     showModalBottomSheet(
       context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      backgroundColor: Colors.white,
       builder: (context) {
         return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Camera'),
-                onTap: () {
-                  Navigator.pop(context);
-                  pickImage(ImageSource.camera);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo),
-                title: const Text('Gallery'),
-                onTap: () {
-                  Navigator.pop(context);
-                  pickImage(ImageSource.gallery);
-                },
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            child: Wrap(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  child: Text(
+                    "Pilih Sumber Logo",
+                    style: TextStyle(
+                      fontFamily: 'poppins',
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: blackColor,
+                    ),
+                  ),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.camera_alt_outlined, color: Color(0xFF64748B)),
+                  title: const Text(
+                    'Kamera',
+                    style: TextStyle(fontFamily: 'poppins', fontSize: 14),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    pickImage(ImageSource.camera);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.photo_library_outlined, color: Color(0xFF64748B)),
+                  title: const Text(
+                    'Galeri',
+                    style: TextStyle(fontFamily: 'poppins', fontSize: 14),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    pickImage(ImageSource.gallery);
+                  },
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -178,100 +204,181 @@ class _ChangeprofilepageperusahaanState
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: CircularProgressIndicator(color: darkMaroon),
+        ),
+      );
+    }
+
+    final bool hasExistingPic = user != null &&
+        user['profile_pict'] != null &&
+        user['profile_pict'].toString().isNotEmpty &&
+        !user['profile_pict'].toString().startsWith('assets/');
+
     return Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            "Ubah Foto Profile",
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: blackColor,
+            size: 20,
           ),
-          flexibleSpace: Container(
-            decoration: BoxDecoration(color: thirdColor),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          "Ubah Logo Perusahaan",
+          style: TextStyle(
+            fontFamily: 'poppins',
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: blackColor,
           ),
         ),
-        body: Container(
-          decoration: BoxDecoration(color: primaryColor),
-          child: isLoading
-              ? const Center(
-                  child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Color(0xFFA86108), // Warna indikator
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
+              Text(
+                "Pratinjau Logo Perusahaan",
+                style: TextStyle(
+                  fontFamily: 'poppins',
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: blackColor,
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                "Gunakan logo resmi perusahaan dengan resolusi proporsional.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'poppins',
+                  fontSize: 13,
+                  color: Color(0xFF64748B),
+                ),
+              ),
+              const SizedBox(height: 36),
+
+              Center(
+                child: Container(
+                  width: 140,
+                  height: 140,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: selectedImage != null ? darkMaroon : const Color(0xFFCBD5E1),
+                      width: 2.5,
+                    ),
                   ),
-                ))
-              : Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(color: primaryColor),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Foto Profil
-                      CircleAvatar(
-                        radius: 70,
-                        backgroundColor: Colors.grey[400],
-                        backgroundImage: selectedImage != null
-                            ? FileImage(
-                                selectedImage!,
+                  child: ClipOval(
+                    child: selectedImage != null
+                        ? Image.file(
+                            selectedImage!,
+                            fit: BoxFit.cover,
+                          )
+                        : (hasExistingPic
+                            ? Image.network(
+                                user['profile_pict'],
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => _defaultPlaceholder(),
                               )
-                            : (user != null &&
-                                    user['profile_pict'] != null
-                                ? NetworkImage(user['profile_pict'])
-                                    as ImageProvider
-                                : const AssetImage(
-                                    'assets/img/defaultPict.png')),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Tombol Pilih Sumber Gambar
-                      ElevatedButton.icon(
-                        onPressed: showImageSourceDialog,
-                        icon: const Icon(Icons.image),
-                        label: const Text("Pilih Gambar"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: secondaryCoolor,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Tombol Kirim
-                      ElevatedButton(
-                        onPressed: selectedImage != null && !isUploading
-                            ? () => _updateProfileData(
-                                  selectedImage!,
-                                  user['id_perusahaan'],
-                                )
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: secondaryCoolor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(
-                              vertical: 14, horizontal: 24),
-                          child: isUploading
-                              ? const CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
-                                  ),
-                                )
-                              : const Text(
-                                  "Kirim",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                        ),
-                      ),
-                    ],
+                            : _defaultPlaceholder()),
                   ),
                 ),
-        ));
+              ),
+              const SizedBox(height: 20),
+
+              OutlinedButton.icon(
+                onPressed: isUploading ? null : showImageSourceDialog,
+                icon: Icon(
+                  Icons.photo_camera_outlined,
+                  size: 18,
+                  color: darkMaroon,
+                ),
+                label: Text(
+                  selectedImage != null ? "Ganti Pilihan Logo" : "Pilih Logo Baru",
+                  style: TextStyle(
+                    fontFamily: 'poppins',
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: darkMaroon,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: darkMaroon, width: 1.2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
+                ),
+              ),
+
+              const Spacer(),
+
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: (selectedImage != null && !isUploading)
+                      ? () {
+                          final int idUser = user != null ? (user['id_perusahaan'] ?? 1) : 1;
+                          _updateProfileData(selectedImage!, idUser);
+                        }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: darkMaroon,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: const Color(0xFFCBD5E1),
+                    disabledForegroundColor: const Color(0xFF94A3B8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: isUploading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          "Simpan Logo Perusahaan",
+                          style: TextStyle(
+                            fontFamily: 'poppins',
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _defaultPlaceholder() {
+    return Container(
+      color: const Color(0xFFF1F5F9),
+      child: Icon(
+        Icons.business_rounded,
+        size: 70,
+        color: const Color(0xFF94A3B8),
+      ),
+    );
   }
 }

@@ -150,22 +150,18 @@ class _homePelamar extends State<home_pelamar> {
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             children: [
-              // 1. HEADER PROFIL PENGGUNA & NOTIFIKASI
               _buildTopHeader(userName),
 
               const SizedBox(height: 24),
 
-              // 3. SECTION LAMARAN ANDA (CARD GELAP ALA REFERENSI)
               _buildApplicationStatusCard(),
 
               const SizedBox(height: 28),
 
-              // 4. SECTION REKOMENDASI LOWONGAN PABRIK
               _buildRecommendationSection(),
 
               const SizedBox(height: 28),
 
-              // 5. SECTION WAWASAN & BERITA INDUSTRI
               _buildIndustrialNewsSection(),
 
               const SizedBox(height: 30),
@@ -176,11 +172,9 @@ class _homePelamar extends State<home_pelamar> {
     );
   }
 
-  // 1. TOP HEADER
   Widget _buildTopHeader(String userName) {
     return Row(
       children: [
-        // Avatar
         Container(
           width: 52,
           height: 52,
@@ -197,21 +191,11 @@ class _homePelamar extends State<home_pelamar> {
             ],
           ),
           child: ClipOval(
-            child: (user != null &&
-                    user['profile_pict'] != null &&
-                    user['profile_pict'].toString().isNotEmpty &&
-                    !user['profile_pict'].toString().startsWith('assets/'))
-                ? Image.network(
-                    user['profile_pict'],
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _defaultAvatar(),
-                  )
-                : _defaultAvatar(),
+            child: _buildAvatarImage(user?['profile_pict']?.toString()),
           ),
         ),
         const SizedBox(width: 14),
 
-        // User info
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -246,19 +230,6 @@ class _homePelamar extends State<home_pelamar> {
           ),
         ),
 
-        // Helpdesk / Chat button
-        _buildHeaderIconButton(
-          icon: Icons.support_agent_rounded,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const Pengaduan()),
-            );
-          },
-        ),
-        const SizedBox(width: 10),
-
-        // Notification button
         _buildHeaderIconButton(
           icon: Icons.notifications_rounded,
           hasBadge: true,
@@ -268,6 +239,33 @@ class _homePelamar extends State<home_pelamar> {
         ),
       ],
     );
+  }
+
+  Widget _buildAvatarImage(String? path) {
+    if (path == null || path.isEmpty) return _defaultAvatar();
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _defaultAvatar(),
+      );
+    }
+    if (path.startsWith('assets/')) {
+      return Image.asset(
+        path,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _defaultAvatar(),
+      );
+    }
+    final file = File(path);
+    if (file.existsSync()) {
+      return Image.file(
+        file,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _defaultAvatar(),
+      );
+    }
+    return _defaultAvatar();
   }
 
   Widget _defaultAvatar() {
@@ -333,9 +331,7 @@ class _homePelamar extends State<home_pelamar> {
   }
 
 
-  // 3. SECTION LAMARAN ANDA (CARD GELAP KONSISTEN DENGAN REFERENSI)
   Widget _buildApplicationStatusCard() {
-    // Ambil 2 lamaran teratas
     final activeApps = myApplications.take(2).toList();
     final int diterimaCount = myApplications
         .where((a) =>
@@ -349,51 +345,21 @@ class _homePelamar extends State<home_pelamar> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "Lamaran Anda",
-              style: TextStyle(
-                fontFamily: 'poppins',
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: blackColor,
-                letterSpacing: -0.3,
-              ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            "Lamaran Anda",
+            style: TextStyle(
+              fontFamily: 'poppins',
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: blackColor,
+              letterSpacing: -0.3,
             ),
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            const riwayatLamaran(showBackButton: true)),
-                  );
-                },
-                borderRadius: BorderRadius.circular(8),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  child: Text(
-                    "Riwayat Lengkap",
-                    style: TextStyle(
-                      fontFamily: 'poppins',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: darkMaroon,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
         const SizedBox(height: 12),
 
-        // Kontainer Gelap
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
@@ -485,11 +451,9 @@ class _homePelamar extends State<home_pelamar> {
 
               const SizedBox(height: 12),
 
-              // Baris Bawah: Status dots & Button Lihat Lainnya
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Status Legend
                   Row(
                     children: [
                       _statusDot(const Color(0xFF10B981), "Diterima"),
@@ -498,7 +462,6 @@ class _homePelamar extends State<home_pelamar> {
                     ],
                   ),
 
-                  // Tombol Lihat lainnya (High contrast white pill on dark charcoal)
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
@@ -576,20 +539,17 @@ class _homePelamar extends State<home_pelamar> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Left Accent Line
               Container(
                 width: 6,
                 color: barColor,
               ),
 
-              // Content
               Expanded(
                 child: Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   child: Row(
                     children: [
-                      // Company Logo Box (Konsisten dengan Rekomendasi, Riwayat Lamaran & Lowongan)
                       Container(
                         width: 60,
                         height: 44,
@@ -621,7 +581,6 @@ class _homePelamar extends State<home_pelamar> {
                       ),
                       const SizedBox(width: 12),
 
-                      // Text Info
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -699,7 +658,6 @@ class _homePelamar extends State<home_pelamar> {
     );
   }
 
-  // 4. REKOMENDASI LOWONGAN PABRIK (FEATURED CARD & LIST ALA REFERENSI)
   Widget _buildRecommendationSection() {
     final jobs = recommendedJobs;
     if (jobs.isEmpty) {
@@ -772,7 +730,6 @@ class _homePelamar extends State<home_pelamar> {
         ),
         const SizedBox(height: 12),
 
-        // Featured Card Utama dalam Kontainer Gelap ala Referensi
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(14),
@@ -794,7 +751,6 @@ class _homePelamar extends State<home_pelamar> {
     );
   }
 
-  // Featured Hero Job Card (Card putih di dalam kontainer gelap dengan dekorasi ombak dan tombol Lamar)
   Widget _buildFeaturedJobCard(Map<String, dynamic> job) {
     final idPerusahaan = job['id_perusahaan'] ?? 1;
     final companyMatch = dummyPerusahaan.firstWhere(
@@ -824,7 +780,6 @@ class _homePelamar extends State<home_pelamar> {
         borderRadius: BorderRadius.circular(16),
         child: Stack(
           children: [
-            // Decorative Waves in bottom right
             Positioned(
               right: -10,
               bottom: -15,
@@ -845,7 +800,6 @@ class _homePelamar extends State<home_pelamar> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Company Logo Box (Kotak bersih & terstruktur)
                       Container(
                         width: 72,
                         height: 52,
@@ -881,7 +835,6 @@ class _homePelamar extends State<home_pelamar> {
                       ),
                       const SizedBox(width: 12),
 
-                      // Title & Company Name
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -917,10 +870,8 @@ class _homePelamar extends State<home_pelamar> {
 
                   const SizedBox(height: 14),
 
-                  // Tags / Pills (Brand Aligned)
                   Row(
                     children: [
-                      // Badge Tipe (Soft Maroon Pill)
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 5),
@@ -940,7 +891,6 @@ class _homePelamar extends State<home_pelamar> {
                       ),
                       const SizedBox(width: 8),
 
-                      // Badge Gaji (Soft Emerald Financial Badge)
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 4),
@@ -967,11 +917,9 @@ class _homePelamar extends State<home_pelamar> {
 
                   const SizedBox(height: 14),
 
-                  // Lokasi & Button Lamar
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Lokasi
                       Expanded(
                         child: Row(
                           children: [
@@ -998,7 +946,6 @@ class _homePelamar extends State<home_pelamar> {
                       ),
                       const SizedBox(width: 8),
 
-                      // Tombol Lamar (Primary CTA Brand Dark Maroon - Min 44dp Touch Target)
                       ElevatedButton(
                         onPressed: () {
                           Navigator.push(
@@ -1040,7 +987,6 @@ class _homePelamar extends State<home_pelamar> {
     );
   }
 
-  // 5. SECTION WAWASAN & BERITA PEKERJAAN PABRIK (OFFLINE RESILIENT, CLEAN EDITORIAL)
   Widget _buildIndustrialNewsSection() {
     final List<Map<String, dynamic>> newsArticles = [
       {
@@ -1109,7 +1055,6 @@ class _homePelamar extends State<home_pelamar> {
         ),
         const SizedBox(height: 12),
 
-        // Horizontal List Kartu Berita Resilien
         SizedBox(
           height: 190,
           child: ListView.separated(
@@ -1161,7 +1106,6 @@ class _homePelamar extends State<home_pelamar> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header Visual Bersih Elegan (Tanpa Icon)
                 Container(
                   height: 85,
                   width: double.infinity,
@@ -1234,7 +1178,6 @@ class _homePelamar extends State<home_pelamar> {
     );
   }
 
-  // DIALOG NOTIFIKASI (INTERAKTIF & NO DEAD CLICKS)
   void _showNotificationDialog() {
     showDialog(
       context: context,
@@ -1378,7 +1321,6 @@ class _homePelamar extends State<home_pelamar> {
     );
   }
 
-  // BOTTOM SHEET ARTIKEL BACAAN
   void _showArticleBottomSheet(Map<String, dynamic> item) {
     showModalBottomSheet(
       context: context,

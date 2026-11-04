@@ -26,28 +26,22 @@ class _LamarPekerjaanState extends State<LamarPekerjaan> {
   }
 
   Future<void> initUser() async {
-    var response = await meAPI().getUserProfile();
     try {
+      var response = await meAPI().getUserProfile();
       if (response['status'] == true && response['data'] != null) {
+        if (!mounted) return;
         setState(() {
           user = response['data'];
           isLoading = false;
         });
       } else {
         if (!mounted) return;
-        isLoading = false;
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Anda belum login ')));
-        Navigator.pushNamed(context, '/login');
-        print("Failed to retrieve user data: ${response['message']}");
+        setState(() {
+          isLoading = false;
+        });
       }
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Anda belum login ')));
-      Navigator.pushNamed(context, '/login');
-      print("Failed to retrieve user data: ${response['message']}");
-    } finally {
+      debugPrint("Error loading user profile: $e");
       if (!mounted) return;
       setState(() {
         isLoading = false;
@@ -60,17 +54,20 @@ class _LamarPekerjaanState extends State<LamarPekerjaan> {
       List<Map<String, dynamic>> jobDetails =
           await Postingpekerjaanapi().detailsJob(widget.jobId);
       if (jobDetails.isNotEmpty) {
+        if (!mounted) return;
         setState(() {
           selectedJob = jobDetails.first;
           isLoading = false;
         });
       } else {
+        if (!mounted) return;
         setState(() {
           isLoading = false;
         });
       }
     } catch (e) {
-      print("Error loading job details: $e");
+      debugPrint("Error loading job details: $e");
+      if (!mounted) return;
       setState(() {
         isLoading = false;
       });
@@ -88,14 +85,10 @@ class _LamarPekerjaanState extends State<LamarPekerjaan> {
   }
 
   void _requestNotificationPermission() async {
-    final bool? granted = await flutterLocalNotificationsPlugin
+    await flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
         ?.requestNotificationsPermission();
-
-    if (granted != null && !granted) {
-      print("Izin notifikasi ditolak oleh pengguna");
-    }
   }
 
   void _showJobApplicationNotification(String jobTitle) async {
@@ -116,41 +109,67 @@ class _LamarPekerjaanState extends State<LamarPekerjaan> {
     await flutterLocalNotificationsPlugin.show(
       0,
       'Lamaran Diajukan',
-      'Anda telah melamar pekerjaan: $jobTitle',
+      'Anda telah melamar: $jobTitle',
       platformChannelSpecifics,
     );
   }
 
   Future<void> lamarPekerjaan(
-      int idPostPekerjaan,
-      int idpelamar,
-      ) async {
+    int idPostPekerjaan,
+    int idpelamar,
+    String companyName,
+  ) async {
     bool? confirmSubmit = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Konfirmasi Pengajuan Lamaran'),
-          content: const Text(
-            'Apakah Anda yakin ingin mengajukan lamaran untuk pekerjaan ini?',
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          backgroundColor: Colors.white,
+          title: Text(
+            'Kirim Lamaran?',
+            style: TextStyle(
+              fontFamily: 'poppins',
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: blackColor,
+            ),
+          ),
+          content: Text(
+            'Berkas lamaran Anda akan dikirimkan ke $companyName untuk ditinjau.',
+            style: const TextStyle(
+              fontFamily: 'poppins',
+              fontSize: 13,
+              color: Color(0xFF475569),
+            ),
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.pop(context, false);
-              },
-              child: const Text('Tidak'),
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text(
+                'Batal',
+                style: TextStyle(
+                  fontFamily: 'poppins',
+                  color: Color(0xFF64748B),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
             ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context, true);
-              },
+              onPressed: () => Navigator.pop(context, true),
               style: ElevatedButton.styleFrom(
-                backgroundColor: thirdColor,
+                backgroundColor: darkMaroon,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               child: const Text(
-                'Ya, Ajukan',
+                'Kirim',
                 style: TextStyle(
-                  color: Colors.white,
+                  fontFamily: 'poppins',
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -174,36 +193,47 @@ class _LamarPekerjaanState extends State<LamarPekerjaan> {
 
       if (result["success"] == true) {
         _showJobApplicationNotification(
-          selectedJob!['posisi'],
+          selectedJob!['posisi'] ?? 'Lowongan Pabrik',
         );
 
         if (!mounted) return;
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(result["message"]),
-            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            content: Text(
+              result["message"] ?? 'Lamaran berhasil diajukan.',
+              style: const TextStyle(fontFamily: 'poppins', fontSize: 13),
+            ),
+            backgroundColor: succesColor,
           ),
         );
 
         Navigator.pushNamedAndRemoveUntil(
           context,
           '/pagePelamar',
-              (route) => false,
+          (route) => false,
         );
       } else {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(result["message"]),
-            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            content: Text(result["message"] ?? 'Gagal mengajukan lamaran.'),
+            backgroundColor: dangerColor,
           ),
         );
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
+          behavior: SnackBarBehavior.floating,
           content: Text("Error: $e"),
-          backgroundColor: Colors.red,
+          backgroundColor: dangerColor,
         ),
       );
     } finally {
@@ -219,271 +249,411 @@ class _LamarPekerjaanState extends State<LamarPekerjaan> {
   Widget build(BuildContext context) {
     if (isLoading) {
       return Scaffold(
-        backgroundColor: primaryColor,
-        body: Center(
-          child: CircularProgressIndicator(
-            color: thirdColor,
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: Colors.white,
+          scrolledUnderElevation: 0,
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: blackColor,
+              size: 20,
+            ),
+            onPressed: () => Navigator.pop(context),
           ),
+          title: Text(
+            "Lamar Pekerjaan",
+            style: TextStyle(
+              fontFamily: 'poppins',
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: blackColor,
+            ),
+          ),
+        ),
+        body: Center(
+          child: CircularProgressIndicator(color: darkMaroon),
         ),
       );
     }
 
     if (selectedJob == null) {
       return Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
-          title: const Text(
-            "Lamar Pekerjaan",
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          elevation: 0,
+          backgroundColor: Colors.white,
+          scrolledUnderElevation: 0,
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: blackColor,
+              size: 20,
+            ),
+            onPressed: () => Navigator.pop(context),
           ),
-          flexibleSpace: Container(
-            decoration: BoxDecoration(color: thirdColor),
+          title: Text(
+            "Lamar Pekerjaan",
+            style: TextStyle(
+              fontFamily: 'poppins',
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: blackColor,
+            ),
           ),
         ),
         body: Center(
-          child: Text("Pekerjaan tidak ditemukan."),
+          child: Text(
+            "Pekerjaan tidak ditemukan.",
+            style: TextStyle(
+              fontFamily: 'poppins',
+              fontSize: 14,
+              color: greyColor,
+            ),
+          ),
         ),
       );
     }
 
-    Color statusColor;
-    String statusText;
-
-    // Determine the job status and corresponding color
-    if (selectedJob!['status'] == 'terbuka') {
-      statusColor = Colors.green; // Green for 'available'
-      statusText = "terbuka";
-    } else {
-      statusColor = Colors.red; // Red for 'closed'
-      statusText = "ditutup";
+    String companyName = 'PT Manufaktur Industri';
+    final int idPerusahaan = selectedJob!['id_perusahaan'] ?? 0;
+    final matchedComp = dummyPerusahaan.firstWhere(
+      (p) => p['id'] == idPerusahaan,
+      orElse: () => <String, dynamic>{},
+    );
+    if (matchedComp.isNotEmpty) {
+      companyName = matchedComp['namaPerusahaanAsli'] ??
+          matchedComp['nama'] ??
+          companyName;
     }
 
+    final String posisi = selectedJob!['posisi'] ?? 'Lowongan Pekerjaan';
+    final String lokasi = selectedJob!['lokasi'] ?? 'Kawasan Industri';
+
+    final String firstName = user?['first_name']?.toString() ?? '';
+    final String lastName = user?['last_name']?.toString() ?? '';
+    final String? rawCv = user?['cv'] ?? user?['curriculum_vitae'] ?? user?['cv_path'];
+    final String? cvName = (rawCv != null && rawCv.isNotEmpty)
+        ? rawCv.split(RegExp(r'[\\/]')).last
+        : null;
+    final bool hasCV = cvName != null && cvName.isNotEmpty;
+
+    final int idPelamar = user != null ? (user['id_pelamar'] ?? 1) : 1;
+    final int idPostPekerjaan = selectedJob!['id_post_pekerjaan'] ?? widget.jobId;
+
     return Scaffold(
-      backgroundColor: primaryColor,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
-          "Lamar Pekerjaan",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        elevation: 0,
+        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: blackColor,
+            size: 20,
+          ),
+          onPressed: () => Navigator.pop(context),
         ),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(color: thirdColor),
+        title: Text(
+          "Lamar Pekerjaan",
+          style: TextStyle(
+            fontFamily: 'poppins',
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: blackColor,
+          ),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            color: const Color(0xFFF1F5F9),
+            height: 1,
+          ),
         ),
       ),
       body: SafeArea(
-        bottom: true,
         child: ListView(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          //crossAxisAlignment: CrossAxisAlignment.start,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           children: [
-            SizedBox(height: 30),
-            Align(
-              child: Text(
-                selectedJob!['posisi'],
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            SizedBox(height: 10),
-            Align(
-              child: Column(
-                children: [
-                  Text(
-                    "Lokasi: ${selectedJob!['lokasi']}",
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  SizedBox(height: 10),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: statusColor, // Using color based on status
-                      borderRadius:
-                          BorderRadius.circular(10), // Border radius 10
-                    ),
-                    child: Text(
-                      "Status: $statusText",
-                      style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white), // White text color
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 80),
-
-            // Job details
             Text(
-              "Deskripsi Pekerjaan:",
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Text(
-              selectedJob!['job_details'] ?? "Tidak ada deskripsi pekerjaan.",
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 20),
-            Text(
-              "Persyaratan:",
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Text(
-              selectedJob!['requirements'] ?? "Tidak ada persyaratan.",
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 50),
-            Align(
-                child: Text(
-              "Deskripsi Pelamar",
+              posisi,
               style: TextStyle(
-                fontSize: 25,
-                fontWeight: FontWeight.bold,
-              ),
-            )),
-            SizedBox(height: 10),
-            Align(
-                alignment: Alignment.center,
-                child: Text(
-                  "Pastikan Anda mengecek persyartan pekerjaan dan semua data diri Anda sebelum melamar",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: greyColor,
-                    fontWeight: FontWeight.w400,
-                  ),
-                )),
-            SizedBox(height: 40),
-            Center(
-              child: Column(
-                mainAxisSize: MainAxisSize
-                    .min, // Use min to prevent it from taking extra space
-                children: [
-                  CircleAvatar(
-                    radius: 40,
-                    backgroundColor: Colors.white,
-                    backgroundImage: user['profile_pict'] != null &&
-                            user['profile_pict'].isNotEmpty
-                        ? NetworkImage(user['profile_pict'])
-                        : null,
-                    child: (user['profile_pict'] == null ||
-                            user['profile_pict'].isEmpty)
-                        ? Icon(
-                            Icons.person,
-                            size: 40,
-                            color: Colors.black,
-                          )
-                        : null,
-                  ),
-
-                  SizedBox(
-                      height: 10), // Use height for spacing instead of width
-                  Container(
-                    width: 300, // Set your desired width here
-                    child: TextField(
-                      controller: TextEditingController(
-                          text: user['first_name'] ??
-                              'Nama tidak tersedia'),
-                      readOnly: true, // Makes the field non-editable
-                      decoration: InputDecoration(
-                        labelText: 'Nama Depan',
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 10), // Space between text fields
-                  // Non-editable TextField for last name
-                  Container(
-                    width: 300, // Set your desired width here
-                    child: TextField(
-                      controller: TextEditingController(
-                          text: user['last_name'] ?? ''),
-                      readOnly: true, // Makes the field non-editable
-                      decoration: InputDecoration(
-                        labelText: 'Nama Belakang',
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  if (user['curriculum_vitae'] == null ||
-                      user['curriculum_vitae'].isEmpty)
-                    Text(
-                      "Anda belum mengupload CV",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontStyle: FontStyle.italic,
-                        color: Colors.red,
-                      ),
-                    )
-                  else if (user['profile_pict'] == null ||
-                      user['profile_pict'].isEmpty)
-                    Text(
-                      "Anda belum mengupload Foto Profil",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontStyle: FontStyle.italic,
-                        color: Colors.red,
-                      ),
-                    )
-                  else
-                    Text(
-                      "Anda sudah mengupload semua data",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontStyle: FontStyle.italic,
-                        color: Colors.green,
-                      ),
-                    ),
-                ],
+                fontFamily: 'poppins',
+                fontSize: 19,
+                fontWeight: FontWeight.w700,
+                color: blackColor,
+                height: 1.3,
               ),
             ),
-            SizedBox(height: 60),
-            Column(
+            const SizedBox(height: 4),
+            Text(
+              companyName,
+              style: const TextStyle(
+                fontFamily: 'poppins',
+                fontSize: 14,
+                color: Color(0xFF64748B),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
               children: [
-                SizedBox(height: 20),
-                Text(
-                  "Saya setuju dengan peraturan yang ditetapkan oleh perusahaan",
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontStyle: FontStyle.italic,
-                      color: greyColor),
-                  textAlign: TextAlign.center,
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 15,
+                  color: Color(0xFF64748B),
                 ),
-                SizedBox(height: 20),
-                Align(
-                  child: (user['profile_pict'] != null &&
-                          user['profile_pict'].isNotEmpty &&
-                          user['curriculum_vitae'] != null &&
-                          user['curriculum_vitae'].isNotEmpty &&
-                          user['about_me'] != null &&
-                          user['about_me'].isNotEmpty)
-                      ? ElevatedButton(
-                          onPressed: () {
-                            int idpelamar = user['id_pelamar'];
-                            int idpostpekerjaan = widget.jobId;
-                            lamarPekerjaan(idpostpekerjaan, idpelamar);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: thirdColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 10),
-                          ),
-                          child: Text(
-                            'Ajukan Lamaran',
-                            style: TextStyle(fontSize: 16, color: Colors.white),
-                          ),
-                        )
-                      : null,
+                const SizedBox(width: 4),
+                Text(
+                  lokasi,
+                  style: const TextStyle(
+                    fontFamily: 'poppins',
+                    fontSize: 13,
+                    color: Color(0xFF64748B),
+                  ),
                 ),
               ],
             ),
 
-            SizedBox(height: 100),
+            const SizedBox(height: 22),
+            const Divider(color: Color(0xFFE2E8F0), height: 1),
+            const SizedBox(height: 22),
+
+            const Text(
+              "Data Pelamar",
+              style: TextStyle(
+                fontFamily: 'poppins',
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF0F172A),
+              ),
+            ),
+            const SizedBox(height: 14),
+
+            _buildInfoRow("Nama Depan", firstName.isNotEmpty ? firstName : "-"),
+            const SizedBox(height: 10),
+            _buildInfoRow("Nama Belakang", lastName.isNotEmpty ? lastName : "-"),
+
+            const SizedBox(height: 22),
+            const Divider(color: Color(0xFFE2E8F0), height: 1),
+            const SizedBox(height: 22),
+
+            const Text(
+              "Berkas Terlampir",
+              style: TextStyle(
+                fontFamily: 'poppins',
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF0F172A),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            if (hasCV)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.description_outlined,
+                      color: darkMaroon,
+                      size: 22,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            cvName!,
+                            style: TextStyle(
+                              fontFamily: 'poppins',
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: blackColor,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          const Text(
+                            "Curriculum Vitae",
+                            style: TextStyle(
+                              fontFamily: 'poppins',
+                              fontSize: 11.5,
+                              color: Color(0xFF64748B),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF2F2),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFFECACA)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.info_outline_rounded,
+                      color: Color(0xFFDC2626),
+                      size: 22,
+                    ),
+                    const SizedBox(width: 10),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Belum ada CV terunggah",
+                            style: TextStyle(
+                              fontFamily: 'poppins',
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF991B1B),
+                            ),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            "Silakan unggah CV terlebih dahulu untuk melamar lowongan ini.",
+                            style: TextStyle(
+                              fontFamily: 'poppins',
+                              fontSize: 11,
+                              color: Color(0xFFB91C1C),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const UploadCv(),
+                          ),
+                        );
+                        initUser();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: darkMaroon,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        visualDensity: VisualDensity.compact,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                      child: const Text(
+                        "Upload",
+                        style: TextStyle(
+                          fontFamily: 'poppins',
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+            const SizedBox(height: 20),
+
+            Text(
+              "Dengan mengajukan lamaran, profil dan CV Anda akan diteruskan ke tim rekrutmen $companyName.",
+              style: const TextStyle(
+                fontFamily: 'poppins',
+                fontSize: 12.5,
+                color: Color(0xFF64748B),
+                height: 1.45,
+              ),
+            ),
+
+            const SizedBox(height: 32),
+
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: () {
+                  if (!hasCV) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        behavior: SnackBarBehavior.floating,
+                        content: const Text("Silakan unggah CV terlebih dahulu sebelum mengajukan lamaran."),
+                        backgroundColor: dangerColor,
+                      ),
+                    );
+                    return;
+                  }
+                  lamarPekerjaan(idPostPekerjaan, idPelamar, companyName);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: darkMaroon,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  "Kirim Lamaran",
+                  style: TextStyle(
+                    fontFamily: 'poppins',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 120,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'poppins',
+              fontSize: 13,
+              color: Color(0xFF64748B),
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(
+              fontFamily: 'poppins',
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: blackColor,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

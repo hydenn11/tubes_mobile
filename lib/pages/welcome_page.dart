@@ -35,13 +35,11 @@ class _WellcomePageState extends State<WellcomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Colors matching requested reference
     const Color bgWhite = Colors.white;
     const Color darkMaroon = Color(0xFF801C1C);
 
     final double topSafeArea = MediaQuery.of(context).padding.top;
 
-    // Ensure status bar icons are dark on white background
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
@@ -95,7 +93,6 @@ class _WellcomePageState extends State<WellcomePage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              // Badge Text-Chip
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 14, vertical: 6),
@@ -125,7 +122,6 @@ class _WellcomePageState extends State<WellcomePage> {
 
                               const SizedBox(height: 26),
 
-                              // Logo (Scaled up ~18% to 215px for bold presence)
                               Image.asset(
                                 'assets/img/logoRekanPabrik.png',
                                 height: 215,
@@ -134,8 +130,7 @@ class _WellcomePageState extends State<WellcomePage> {
 
                               const SizedBox(height: 28),
 
-                              // Action Button 1: Daftar Akun
-                              SizedBox(
+                                                            SizedBox(
                                 width: double.infinity,
                                 height: 52,
                                 child: ElevatedButton(
@@ -167,8 +162,7 @@ class _WellcomePageState extends State<WellcomePage> {
 
                               const SizedBox(height: 14),
 
-                              // Action Button 2: Masuk
-                              SizedBox(
+                                                            SizedBox(
                                 width: double.infinity,
                                 height: 52,
                                 child: OutlinedButton(
