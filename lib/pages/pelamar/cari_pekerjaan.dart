@@ -31,7 +31,7 @@ class _CaripekerjaanState extends State<Caripekerjaan> {
                         style: TextStyle(
                             fontSize: 30,
                             fontWeight: FontWeight.bold,
-                            color: thirdColor),
+                            color: darkMaroon),
                       ),
                     ),
                     SizedBox(
@@ -48,8 +48,7 @@ class _CaripekerjaanState extends State<Caripekerjaan> {
                                 text: "Di ", // Teks awal
                                 style: TextStyle(
                                   fontSize: 16,
-                                  fontWeight: FontWeight.normal,
-                                  color: thirdColor,
+                                  fontWeight: FontWeight.normal, color: const Color(0xFF475569),
                                 ),
                               ),
                               TextSpan(
@@ -58,7 +57,7 @@ class _CaripekerjaanState extends State<Caripekerjaan> {
                                   fontSize: 16,
                                   fontWeight:
                                       FontWeight.bold, // Membuat teks bold
-                                  color: thirdColor,
+                                  color: darkMaroon,
                                 ),
                               ),
                               TextSpan(
@@ -66,8 +65,7 @@ class _CaripekerjaanState extends State<Caripekerjaan> {
                                     ", kami memudahkan Anda menemukan peluang kerja yang sesuai dengan keterampilan, pengalaman, dan tujuan karier Anda. Telusuri daftar lengkap kami dan ambil langkah berikutnya dalam perjalanan karier Anda.",
                                 style: TextStyle(
                                   fontSize: 16,
-                                  fontWeight: FontWeight.normal,
-                                  color: thirdColor,
+                                  fontWeight: FontWeight.normal, color: const Color(0xFF475569),
                                 ),
                               ),
                             ],

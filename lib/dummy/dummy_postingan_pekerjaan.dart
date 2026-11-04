@@ -2,115 +2,106 @@ List<Map<String, dynamic>> dummyPostPekerjaan = [
   {
     'id_post_pekerjaan': 1,
     'id_perusahaan': 1,
-    'posisi': 'Software Engineer',
-    'lokasi': 'Jakarta',
+    'posisi': 'Operator Produksi (Assembly)',
+    'lokasi': 'Kawasan GIIC Cikarang',
+    'tipe': 'Penuh Waktu',
+    'gaji': 'Rp 5.2 - 6.5 Juta',
+    'bidang': 'Otomotif & Komponen',
     'job_details':
-        'Mengembangkan aplikasi berbasis web dengan framework modern.',
+        'Melakukan perakitan komponen suku cadang otomotif di lini perakitan conveyor sesuai instruksi kerja (SOP), menjaga target ritme produksi harian, dan menerapkan prinsip 5S di area workshop.',
     'requirements':
-        'Pengalaman minimal 2 tahun dalam pengembangan web. Menguasai React.js dan Node.js.',
+        'Lulusan SMK/SMA sederajat (Teknik Otomotif/Mesin diutamakan). Usia 18-24 tahun, teliti, tidak buta warna, dan siap bekerja sistem 3 shift.',
     'status': 'tersedia',
-    'createdAt': DateTime.parse('2024-10-01'), // Mengubah menjadi DateTime
+    'createdAt': DateTime.parse('2024-10-01'),
   },
   {
     'id_post_pekerjaan': 2,
     'id_perusahaan': 2,
-    'posisi': 'Marketing Manager',
-    'lokasi': 'Bandung',
-    'job_details': 'Bertanggung jawab atas strategi pemasaran perusahaan.',
+    'posisi': 'Teknisi Maintenance Mesin CNC',
+    'lokasi': 'Kawasan KIIC Karawang',
+    'tipe': 'Penuh Waktu',
+    'gaji': 'Rp 6.0 - 8.2 Juta',
+    'bidang': 'Mesin & Alat Berat',
+    'job_details':
+        'Melakukan perawatan preventif dan perbaikan mesin bubut/milling CNC, trouble-shooting sistem pneumatik & hidrolik, serta meminimalkan downtime mesin di lini produksi otomotif.',
     'requirements':
-        'Pengalaman minimal 5 tahun dalam bidang pemasaran. Mampu bekerja dengan target.',
+        'Pendidikan D3/SMK Teknik Mesin / Mekatronika. Pengalaman minimal 1 tahun merawat mesin industri, mampu membaca wiring diagram & PLC dasar.',
     'status': 'tersedia',
-    'createdAt': DateTime.parse('2024-10-02'), // Mengubah menjadi DateTime
+    'createdAt': DateTime.parse('2024-10-02'),
   },
   {
     'id_post_pekerjaan': 3,
     'id_perusahaan': 3,
-    'posisi': 'Data Analyst',
-    'lokasi': 'Surabaya',
+    'posisi': 'Quality Control (QC) Inspector',
+    'lokasi': 'Balaraja, Tangerang',
+    'tipe': 'Penuh Waktu',
+    'gaji': 'Rp 5.1 - 6.4 Juta',
+    'bidang': 'FMCG / Makanan',
     'job_details':
-        'Menganalisis data perusahaan untuk pengambilan keputusan bisnis.',
+        'Melakukan inspeksi visual dan pengukuran dimensi sampel produk jadi di laboratorium pabrik, memantau standar hygiene sanitasi, dan memastikan kepatuhan standar mutu ISO 22000.',
     'requirements':
-        'Memiliki kemampuan analisis data yang kuat. Menguasai SQL dan Python.',
+        'SMK Kimia Industri / Teknik Pangan / SMA IPA. Teliti, memiliki pemahaman dasar GMP (Good Manufacturing Practice) dan HACCP.',
     'status': 'tersedia',
-    'createdAt': DateTime.parse('2024-10-03'), // Mengubah menjadi DateTime
+    'createdAt': DateTime.parse('2024-10-03'),
   },
   {
     'id_post_pekerjaan': 4,
     'id_perusahaan': 4,
-    'posisi': 'UI/UX Designer',
-    'lokasi': 'Yogyakarta',
-    'job_details': 'Merancang antarmuka dan pengalaman pengguna yang intuitif.',
+    'posisi': 'Welder & Fitter Fabrikasi Baja',
+    'lokasi': 'Kawasan Industri Cilegon',
+    'tipe': 'Proyek',
+    'gaji': 'Rp 6.5 - 9.0 Juta',
+    'bidang': 'Peleburan & Fabrikasi Baja',
+    'job_details':
+        'Melakukan pengelasan struktur baja tebal dan pipa industri menggunakan teknik SMAW/GMAW (MIG/MAG) serta membantu fitting konstruksi sebelum proses erection.',
     'requirements':
-        'Pengalaman dalam desain UI/UX. Menguasai Figma dan Adobe XD.',
+        'Memiliki sertifikasi Welder minimal 3G/4G atau 6G dari Kemnaker/BNSP. Pengalaman kerja minimal 2 tahun di fabrikasi logam/galangan kapal.',
     'status': 'tersedia',
-    'createdAt': DateTime.parse('2024-10-04'), // Mengubah menjadi DateTime
+    'createdAt': DateTime.parse('2024-10-04'),
   },
   {
     'id_post_pekerjaan': 5,
     'id_perusahaan': 5,
-    'posisi': 'Project Manager',
-    'lokasi': 'Makassar',
-    'job_details': 'Memimpin tim untuk menyelesaikan proyek tepat waktu.',
+    'posisi': 'Operator Forklift & Gudang Logistik',
+    'lokasi': 'Jababeka Cikarang',
+    'tipe': 'Kontrak',
+    'gaji': 'Rp 5.3 - 6.5 Juta',
+    'bidang': 'Gudang & Logistik Pabrik',
+    'job_details':
+        'Mengoperasikan forklift reach truck / counter balance untuk loading-unloading bahan baku, penataan pallet di racking tinggi, dan input mutasi stok barang.',
     'requirements':
-        'Pengalaman sebagai manajer proyek. Mampu bekerja dengan banyak tim.',
+        'Wajib memiliki SIO (Surat Izin Operator) Forklift aktif yang dikeluarkan Kemnaker. Pengalaman min. 1 tahun di warehouse pabrik.',
     'status': 'tersedia',
-    'createdAt': DateTime.parse('2024-10-05'), // Mengubah menjadi DateTime
+    'createdAt': DateTime.parse('2024-10-05'),
   },
   {
     'id_post_pekerjaan': 6,
     'id_perusahaan': 6,
-    'posisi': 'Backend Developer',
-    'lokasi': 'Jakarta',
+    'posisi': 'Operator SMT & Perakitan Elektronik',
+    'lokasi': 'Kawasan EJIP Cikarang',
+    'tipe': 'Penuh Waktu',
+    'gaji': 'Rp 5.2 - 6.2 Juta',
+    'bidang': 'Elektronika & Presisi',
     'job_details':
-        'Mengembangkan API dan mengelola server untuk aplikasi berbasis web.',
+        'Mengawasi jalannya mesin SMT (Surface Mount Technology), pemasangan komponen PCB berkecepatan tinggi, dan inspeksi solder manual (AOI).',
     'requirements':
-        'Menguasai Node.js dan MongoDB. Pengalaman dengan RESTful API.',
+        'SMK Elektronika / Listrik / Mesin. Memiliki ketelitian tinggi terhadap komponen mikro dan terbiasa bekerja di ruangan cleanroom ber-AC.',
     'status': 'tersedia',
-    'createdAt': DateTime.parse('2024-10-06'), // Mengubah menjadi DateTime
+    'createdAt': DateTime.parse('2024-10-06'),
   },
   {
     'id_post_pekerjaan': 7,
     'id_perusahaan': 7,
-    'posisi': 'Customer Service',
-    'lokasi': 'Bali',
-    'job_details': 'Memberikan pelayanan terbaik kepada pelanggan perusahaan.',
-    'requirements':
-        'Kemampuan komunikasi yang baik. Pengalaman di bidang customer service.',
-    'status': 'tersedia',
-    'createdAt': DateTime.parse('2024-10-07'), // Mengubah menjadi DateTime
-  },
-  {
-    'id_post_pekerjaan': 8,
-    'id_perusahaan': 8,
-    'posisi': 'Content Writer',
-    'lokasi': 'Semarang',
+    'posisi': 'Pengawas K3 & Lingkungan Pabrik',
+    'lokasi': 'Pulo Gadung, Jakarta Timur',
+    'tipe': 'Penuh Waktu',
+    'gaji': 'Rp 7.0 - 9.5 Juta',
+    'bidang': 'K3 & Keselamatan Kerja',
     'job_details':
-        'Menulis konten berkualitas untuk kebutuhan pemasaran digital.',
-    'requirements': 'Pengalaman dalam menulis artikel dan konten pemasaran.',
+        'Melakukan safety induction bagi tenaga kerja baru, audit rutin penggunaan APD, penyusunan dokumen JSA (Job Safety Analysis), serta pelaporan kecelakaan kerja.',
+    'requirements':
+        'D3/S1 Teknik / Keselamatan dan Kesehatan Kerja (K3). Memiliki sertifikat Ahli K3 Umum resmi Kemnaker RI.',
     'status': 'tersedia',
-    'createdAt': DateTime.parse('2024-10-08'), // Mengubah menjadi DateTime
-  },
-  {
-    'id_post_pekerjaan': 9,
-    'id_perusahaan': 9,
-    'posisi': 'HR Specialist',
-    'lokasi': 'Medan',
-    'job_details': 'Mengelola rekrutmen dan kesejahteraan karyawan.',
-    'requirements':
-        'Pengalaman dalam manajemen SDM. Mampu bekerja dengan baik di tim.',
-    'status': 'berakhir',
-    'createdAt': DateTime.parse('2024-10-09'), // Mengubah menjadi DateTime
-  },
-  {
-    'id_post_pekerjaan': 10,
-    'id_perusahaan': 10,
-    'posisi': 'Sales Executive',
-    'lokasi': 'Palembang',
-    'job_details':
-        'Bertanggung jawab untuk menjual produk dan layanan perusahaan.',
-    'requirements':
-        'Pengalaman di bidang penjualan. Mampu bekerja dengan target penjualan.',
-    'status': 'berakhir',
-    'createdAt': DateTime.parse('2024-10-10'), // Mengubah menjadi DateTime
+    'createdAt': DateTime.parse('2024-10-07'),
   },
 ];

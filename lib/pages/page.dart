@@ -42,6 +42,7 @@ import 'package:rekanpabrik/shared/shared.dart';
 
 // UTILS
 import 'package:rekanpabrik/dummy/dummy_perusahaan.dart';
+import 'package:rekanpabrik/dummy/dummy_postingan_pekerjaan.dart';
 import 'package:rekanpabrik/utils/formatted_date.dart';
 
 import '../components/hrd_navbar_component.dart';

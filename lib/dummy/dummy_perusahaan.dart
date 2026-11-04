@@ -2,101 +2,71 @@ List<Map<String, dynamic>> dummyPerusahaan = [
   {
     'id': 1,
     'img': 'assets/img/logoRekanPabrik.png',
-    'nama': 'Perusahaan A',
-    'namaPerusahaanAsli': 'PT Nusantara Sejahtera',
+    'nama': 'PT Astra Otoparts Tbk',
+    'namaPerusahaanAsli': 'PT Astra Otoparts Tbk',
     'about':
-        'Perusahaan A bergerak di bidang manufaktur dan distribusi produk makanan olahan.',
-    'alamat': 'Jl. Merdeka No. 1, Jakarta',
-    'jumlahLowongan': 10
+        'Perusahaan manufaktur terkemuka di Indonesia yang memproduksi berbagai komponen suku cadang otomotif presisi tinggi.',
+    'alamat': 'Kawasan Industri GIIC Cikarang, Jawa Barat',
+    'jumlahLowongan': 12
   },
   {
     'id': 2,
     'img': 'assets/img/logoRekanPabrik.png',
-    'nama': 'Perusahaan B',
-    'namaPerusahaanAsli': 'CV Citra Teknologi',
+    'nama': 'PT Toyota Motor Manufacturing',
+    'namaPerusahaanAsli': 'PT Toyota Motor Manufacturing Indonesia',
     'about':
-        'Perusahaan B merupakan perusahaan yang menyediakan layanan IT dan pengembangan perangkat lunak.',
-    'alamat': 'Jl. Gatot Subroto No. 15, Bandung',
-    'jumlahLowongan': 15
+        'Pabrik perakitan otomotif global dan manufaktur mesin kendaraan dengan standar teknologi manufaktur modern.',
+    'alamat': 'Kawasan Industri KIIC Karawang, Jawa Barat',
+    'jumlahLowongan': 8
   },
   {
     'id': 3,
     'img': 'assets/img/logoRekanPabrik.png',
-    'nama': 'Perusahaan C',
-    'namaPerusahaanAsli': 'PT Maju Jaya Abadi',
+    'nama': 'PT Mayora Indah Tbk',
+    'namaPerusahaanAsli': 'PT Mayora Indah Tbk',
     'about':
-        'Perusahaan C adalah perusahaan retail yang fokus pada distribusi barang kebutuhan sehari-hari.',
-    'alamat': 'Jl. Sudirman No. 22, Surabaya',
-    'jumlahLowongan': 8
+        'Salah satu kelompok usaha manufaktur produk konsumen (FMCG) terbesar yang memproduksi makanan olahan dan biskuit.',
+    'alamat': 'Kawasan Industri Balaraja, Tangerang, Banten',
+    'jumlahLowongan': 15
   },
   {
     'id': 4,
     'img': 'assets/img/logoRekanPabrik.png',
-    'nama': 'Perusahaan D',
-    'namaPerusahaanAsli': 'PT Sejahtera Bersama',
+    'nama': 'PT Krakatau Steel Tbk',
+    'namaPerusahaanAsli': 'PT Krakatau Steel (Persero) Tbk',
     'about':
-        'Perusahaan D bergerak di sektor transportasi dan logistik, melayani pengiriman barang antar pulau.',
-    'alamat': 'Jl. Diponegoro No. 9, Medan',
-    'jumlahLowongan': 20
+        'Produsen baja terpadu terbesar di Indonesia yang memproduksi baja lembaran panas, pipa baja industri, dan konstruksi.',
+    'alamat': 'Kawasan Industri Krakatau, Cilegon, Banten',
+    'jumlahLowongan': 6
   },
   {
     'id': 5,
     'img': 'assets/img/logoRekanPabrik.png',
-    'nama': 'Perusahaan E',
-    'namaPerusahaanAsli': 'PT Sentosa Raya',
+    'nama': 'PT Unilever Indonesia Factory',
+    'namaPerusahaanAsli': 'PT Unilever Indonesia Tbk (Pabrik Cikarang)',
     'about':
-        'Perusahaan E bergerak dalam bidang properti dan pengembangan kawasan perumahan.',
-    'alamat': 'Jl. Ahmad Yani No. 3, Makassar',
-    'jumlahLowongan': 12
+        'Pusat manufaktur produk perawatan rumah dan kebersihan dengan otomatisasi pabrik berstandar ramah lingkungan.',
+    'alamat': 'Kawasan Industri Jababeka, Cikarang, Jawa Barat',
+    'jumlahLowongan': 10
   },
   {
     'id': 6,
     'img': 'assets/img/logoRekanPabrik.png',
-    'nama': 'Perusahaan F',
-    'namaPerusahaanAsli': 'PT Agro Lestari',
+    'nama': 'PT Indonesia Epson Industry',
+    'namaPerusahaanAsli': 'PT Indonesia Epson Industry',
     'about':
-        'Perusahaan F berfokus pada industri pertanian dan pengolahan hasil tani.',
-    'alamat': 'Jl. Pahlawan No. 12, Semarang',
-    'jumlahLowongan': 18
+        'Perusahaan manufaktur elektronik dan perakitan printer serta komponen presisi terkemuka di kawasan EJIP.',
+    'alamat': 'Kawasan Industri EJIP, Cikarang Selatan, Jawa Barat',
+    'jumlahLowongan': 14
   },
   {
     'id': 7,
     'img': 'assets/img/logoRekanPabrik.png',
-    'nama': 'Perusahaan G',
-    'namaPerusahaanAsli': 'PT Garuda Jaya',
+    'nama': 'PT Yamaha Motor Manufacturing',
+    'namaPerusahaanAsli': 'PT Yamaha Indonesia Motor Manufacturing',
     'about':
-        'Perusahaan G adalah perusahaan penerbangan yang melayani penerbangan domestik dan internasional.',
-    'alamat': 'Jl. Kebon Sirih No. 77, Jakarta',
-    'jumlahLowongan': 22
-  },
-  {
-    'id': 8,
-    'img': 'assets/img/logoRekanPabrik.png',
-    'nama': 'Perusahaan H',
-    'namaPerusahaanAsli': 'PT Global Media',
-    'about':
-        'Perusahaan H adalah perusahaan media yang fokus pada penyiaran dan produksi konten digital.',
-    'alamat': 'Jl. Jenderal Sudirman No. 88, Bali',
+        'Pabrik manufaktur sepeda motor terintegrasi mulai dari casting, machining, welding, hingga final assembly.',
+    'alamat': 'Kawasan Industri Pulo Gadung, Jakarta Timur',
     'jumlahLowongan': 9
-  },
-  {
-    'id': 9,
-    'img': 'assets/img/logoRekanPabrik.png',
-    'nama': 'Perusahaan I',
-    'namaPerusahaanAsli': 'CV Cipta Karya',
-    'about':
-        'Perusahaan I adalah perusahaan kontraktor yang mengerjakan proyek infrastruktur.',
-    'alamat': 'Jl. Imam Bonjol No. 20, Yogyakarta',
-    'jumlahLowongan': 16
-  },
-  {
-    'id': 10,
-    'img': 'assets/img/logoRekanPabrik.png',
-    'nama': 'Perusahaan J',
-    'namaPerusahaanAsli': 'PT Inovasi Digital',
-    'about':
-        'Perusahaan J bergerak di sektor teknologi dengan fokus pada pengembangan aplikasi mobile dan web.',
-    'alamat': 'Jl. Dr. Soetomo No. 99, Surabaya',
-    'jumlahLowongan': 25
   },
 ];
