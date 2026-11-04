@@ -19,7 +19,6 @@ class _HRDnavbarComponentState extends State<HRDnavbarComponent> {
   late List<Widget> _pages;
 
   Future<bool> _onWillPop() async {
-    // Disable back button functionality
     return false;
   }
 
@@ -27,7 +26,6 @@ class _HRDnavbarComponentState extends State<HRDnavbarComponent> {
   void initState() {
     super.initState();
 
-    // Initialize the pages
     _selectedIndex = widget.initialIndex;
 
     _pages = [
@@ -51,7 +49,7 @@ class _HRDnavbarComponentState extends State<HRDnavbarComponent> {
       onWillPop: _onWillPop,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        body: _buildPage(_selectedIndex), // Main page
+        body: _buildPage(_selectedIndex),
         bottomNavigationBar: Container(
           height: 90,
           decoration: BoxDecoration(
@@ -93,29 +91,28 @@ class _HRDnavbarComponentState extends State<HRDnavbarComponent> {
             selectedItemColor: Colors.white,
             unselectedItemColor: Colors.white,
             onTap: _onItemTapped,
-            elevation: 0, // Remove default shadow
+            elevation: 0,
           ),
         ),
       ),
     );
   }
 
-  // Create background circle effect when icon is selected
   Widget _buildIcon(IconData iconData, int index) {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: _selectedIndex == index
             ? Colors.white
-            : Colors.transparent, // Color when selected
+            : Colors.transparent,
       ),
-      padding: EdgeInsets.all(8.0), // Make circle larger
+      padding: EdgeInsets.all(8.0),
       child: Icon(iconData,
           size: 25, color: _selectedIndex == index ? thirdColor : Colors.white),
     );
   }
 
   Widget _buildPage(int index) {
-    return _pages[index]; // Access the page based on the correct index
+    return _pages[index];
   }
 }

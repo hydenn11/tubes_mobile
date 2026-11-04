@@ -145,7 +145,6 @@ class _KirimPengaduanState extends State<KirimPengaduan> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Nama Depan
               const Text(
                 "Nama Depan",
                 style:
@@ -164,7 +163,6 @@ class _KirimPengaduanState extends State<KirimPengaduan> {
                 ),
               ),
               const SizedBox(height: 16),
-              // Nama Belakang
               const Text(
                 "Nama Belakang",
                 style:
@@ -183,7 +181,6 @@ class _KirimPengaduanState extends State<KirimPengaduan> {
                 ),
               ),
               const SizedBox(height: 16),
-              // Email
               const Text(
                 "Email",
                 style:
@@ -203,7 +200,6 @@ class _KirimPengaduanState extends State<KirimPengaduan> {
                 ),
               ),
               const SizedBox(height: 16),
-              // Nomor Telepon
               const Text(
                 "Nomor Telepon",
                 style:
@@ -223,7 +219,6 @@ class _KirimPengaduanState extends State<KirimPengaduan> {
                 ),
               ),
               const SizedBox(height: 16),
-              // Pesan Pengaduan
               const Text(
                 "Pesan Pengaduan",
                 style:

@@ -1,26 +1,51 @@
 List<Map<String, dynamic>> dummyAccounts = [
   {
     'name': 'Rafif Purnomo',
+    'first_name': 'Rafif',
+    'last_name': 'Purnomo',
+    'username': 'rafif',
     'email': 'rafif@gmail.com',
     'password': 'password123',
     'role': 'pelamar',
   },
   {
     'name': 'Luthfi Ramadhan',
+    'first_name': 'Luthfi',
+    'last_name': 'Ramadhan',
+    'username': 'luthfi',
     'email': 'luthfi@gmail.com',
     'password': 'password123',
     'role': 'pelamar',
   },
   {
-    'name': 'Arvin',
+    'name': 'PT Sentosa Makmur',
+    'nama_perusahaan': 'PT Sentosa Makmur',
+    'username': 'arvin',
     'email': 'arvin@gmail.com',
     'password': 'password123',
     'role': 'HRD',
+    'alamat': 'Kawasan Industri MM2100 Blok C-4, Cikarang Barat, Bekasi',
+    'about':
+        'PT Sentosa Makmur adalah perusahaan manufaktur komponen presisi dan perakitan mekanikal terkemuka di Indonesia.',
   },
   {
     'name': 'Rakean Permana',
+    'first_name': 'Rakean',
+    'last_name': 'Permana',
+    'username': 'rakean',
     'email': 'rakean@gmail.com',
-    'password': 'password789',
+    'password': 'password123',
     'role': 'admin',
+  },
+  {
+    'name': 'PT Astra Otoparts Tbk',
+    'nama_perusahaan': 'PT Astra Otoparts Tbk',
+    'username': 'hrd',
+    'email': 'hrd@gmail.com',
+    'password': 'password123',
+    'role': 'HRD',
+    'alamat': 'Kawasan Industri GIIC Blok A, Cikarang, Jawa Barat',
+    'about':
+        'Perusahaan manufaktur terkemuka di Indonesia yang memproduksi berbagai komponen suku cadang otomotif presisi tinggi.',
   },
 ];

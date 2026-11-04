@@ -48,7 +48,10 @@ class PerusahaanAPI {
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('user_name', namaPerusahaan);
+    await prefs.setString('user_nama_perusahaan', namaPerusahaan);
     await prefs.setString('user_email', email);
+    await prefs.setString('user_alamat', alamatPerusahaan);
+    await prefs.setString('user_about', tentangPerusahaan);
     return true;
   }
 

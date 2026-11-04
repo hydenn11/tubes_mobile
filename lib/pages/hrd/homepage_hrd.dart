@@ -167,7 +167,7 @@ class _HomepagehrdState extends State<Homepagehrd> {
                     borderRadius: BorderRadius.circular(
                         8), // Membuat foto berbentuk rounded
                     child: Image.asset(
-                      'assets/img/Image1.png', // Path ke foto Anda
+                      'assets/img/Image1.png',
                       height: 200, // Tinggi foto
                       width: 500, // Lebar foto
                       fit: BoxFit.fill, // Menjaga proporsi foto
@@ -266,7 +266,7 @@ class _HomepagehrdState extends State<Homepagehrd> {
                     borderRadius: BorderRadius.circular(
                         8), // Membuat foto berbentuk rounded
                     child: Image.asset(
-                      'assets/img/Image2.png', // Path ke foto Anda
+                      'assets/img/Image2.png',
                       height: 200, // Tinggi foto
                       width: 500, // Lebar foto
                       fit: BoxFit.fill, // Menjaga proporsi foto

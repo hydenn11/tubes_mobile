@@ -187,7 +187,7 @@ class _ResetpasspelamarState extends State<Resetpasspelamar> {
               ),
               TextField(
                 controller: newPasswordController, // Menghubungkan controller
-                obscureText: _obscureText, // Kontrol visibilitas password
+                obscureText: _obscureText,
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.lock, size: 20),
                   labelText: 'Password Baru',
@@ -213,7 +213,7 @@ class _ResetpasspelamarState extends State<Resetpasspelamar> {
                     onPressed: () {
                       setState(() {
                         _obscureText =
-                            !_obscureText; // Toggle visibilitas password
+                            !_obscureText;
                       });
                     },
                   ),
@@ -255,7 +255,7 @@ class _ResetpasspelamarState extends State<Resetpasspelamar> {
                     onPressed: () {
                       setState(() {
                         _obscureText =
-                            !_obscureText; // Toggle visibilitas password
+                            !_obscureText;
                       });
                     },
                   ),

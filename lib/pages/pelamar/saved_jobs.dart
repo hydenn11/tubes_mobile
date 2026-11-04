@@ -41,17 +41,17 @@ class _savedJobsState extends State<savedJobs> {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Container(
-                        width: 350, // Sesuaikan dengan kebutuhan
+                        width: 350,
                         child: RichText(
                           text: TextSpan(
                             children: [
                               TextSpan(
                                 text:
-                                    "Pantau Peluang yang Penting ", // Teks yang di-bold
+                                    "Pantau Peluang yang Penting ",
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight:
-                                      FontWeight.bold, // Membuat teks bold
+                                      FontWeight.bold,
                                   color: thirdColor,
                                 ),
                               ),
@@ -65,11 +65,11 @@ class _savedJobsState extends State<savedJobs> {
                                 ),
                               ),
                               TextSpan(
-                                text: " RekanPabrik", // Teks yang di-bold
+                                text: " RekanPabrik",
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight:
-                                      FontWeight.bold, // Membuat teks bold
+                                      FontWeight.bold,
                                   color: thirdColor,
                                 ),
                               ),
@@ -99,7 +99,6 @@ class _savedJobsState extends State<savedJobs> {
               ),
             ],
           )),
-      //bottomNavigationBar: navbarComponent(),
     );
   }
 }

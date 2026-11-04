@@ -131,7 +131,7 @@ class _searchBarCariPabrik extends State<searchBarCariPabrik> {
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
                           borderRadius:
-                              BorderRadius.circular(10), // Rounded corners
+                              BorderRadius.circular(10),
                           color: Colors.white,
                         ),
                         child: InkWell(

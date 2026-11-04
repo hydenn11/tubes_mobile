@@ -39,17 +39,17 @@ class _CekpelamarState extends State<Cekpelamar> {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Container(
-                        width: 350, // Sesuaikan dengan kebutuhan
+                        width: 350,
                         child: RichText(
                           text: TextSpan(
                             children: [
                               TextSpan(
                                 text:
-                                    "Tetap Terinformasi Tentang Proses Perekrutan Anda ", // Teks yang di-bold
+                                    "Tetap Terinformasi Tentang Proses Perekrutan Anda ",
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight:
-                                      FontWeight.bold, // Membuat teks bold
+                                      FontWeight.bold,
                                   color: thirdColor,
                                 ),
                               ),

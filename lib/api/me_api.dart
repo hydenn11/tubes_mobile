@@ -8,7 +8,13 @@ class meAPI {
     final prefs = await SharedPreferences.getInstance();
     final role = prefs.getString('user_role') ?? 'pelamar';
     final email = prefs.getString('user_email') ?? (role == 'perusahaan' ? 'daffa@gmail.com' : 'rafif@gmail.com');
-    final name = prefs.getString('user_name') ?? (role == 'perusahaan' ? 'PT Nusantara Sejahtera' : 'Rafif Purnomo');
+    final name = prefs.getString('user_name') ?? (role == 'perusahaan' ? 'PT Sentosa Makmur' : 'Rafif Purnomo');
+    final firstName = prefs.getString('user_first_name') ?? name.split(' ').first;
+    final lastName = prefs.getString('user_last_name') ?? (name.split(' ').length > 1 ? name.split(' ').sublist(1).join(' ') : 'Purnomo');
+    final username = prefs.getString('user_username') ?? firstName.toLowerCase();
+    final namaPerusahaan = prefs.getString('user_nama_perusahaan') ?? name;
+    final alamat = prefs.getString('user_alamat') ?? 'Kawasan Industri MM2100 Blok C-4, Cikarang Barat';
+    final about = prefs.getString('user_about') ?? '$namaPerusahaan adalah perusahaan manufaktur komponen presisi dan perakitan mekanikal terkemuka di Indonesia.';
 
     if (role == 'perusahaan' || role == 'hrd') {
       return {
@@ -17,14 +23,16 @@ class meAPI {
           'id': 1,
           'id_perusahaan': 1,
           'role': 'perusahaan',
-          'nama': name,
-          'namaPerusahaanAsli': name,
-          'nama_perusahaan': name,
+          'nama': namaPerusahaan,
+          'namaPerusahaanAsli': namaPerusahaan,
+          'nama_perusahaan': namaPerusahaan,
+          'username': username,
           'email': email,
-          'alamat': 'Jl. Merdeka No. 1, Jakarta Pusat',
-          'about': 'PT Nusantara Sejahtera adalah perusahaan manufaktur dan distribusi terkemuka di Indonesia.',
-          'aboutMe': 'PT Nusantara Sejahtera adalah perusahaan manufaktur dan distribusi terkemuka di Indonesia.',
-          'about_me': 'PT Nusantara Sejahtera adalah perusahaan manufaktur dan distribusi terkemuka di Indonesia.',
+          'alamat': alamat,
+          'deskripsi': about,
+          'about': about,
+          'aboutMe': about,
+          'about_me': about,
           'profile_pict': 'assets/img/logoRekanPabrik.png',
           'img': 'assets/img/logoRekanPabrik.png',
         }
@@ -37,8 +45,9 @@ class meAPI {
           'id_pelamar': 1,
           'role': 'pelamar',
           'nama': name,
-          'first_name': name.split(' ').first,
-          'last_name': name.split(' ').length > 1 ? name.split(' ').sublist(1).join(' ') : 'Purnomo',
+          'first_name': firstName,
+          'last_name': lastName,
+          'username': username,
           'email': email,
           'alamat': 'Jl. Industri Manufaktur No. 10, Cikarang',
           'phone': '081234567890',

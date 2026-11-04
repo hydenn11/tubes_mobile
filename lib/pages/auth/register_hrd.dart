@@ -6,7 +6,6 @@ class register_hrd extends StatefulWidget {
 }
 
 class _registerHrdState extends State<register_hrd> {
-  // VARIABLE
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   final TextEditingController EmailController = TextEditingController();
@@ -38,7 +37,6 @@ class _registerHrdState extends State<register_hrd> {
     _initializeNotifications();
   }
 
-  // FUNGSI
   bool isEmailValid(String email) {
     return email.contains('@');
   }
@@ -54,20 +52,17 @@ class _registerHrdState extends State<register_hrd> {
   Future<void> createAccountPerusahaan(String email, String password,
       String namaPerusahaan, String confirmPass) async {
     setState(() {
-      // Reset semua error messages
       CompanyNameErrorMessage = '';
       emailErrorMessage = '';
       passErrorMessage = '';
       confirmPassErrorMessage = '';
       termsErrorMessage = '';
 
-      // Reset status error
       CompanyNameIsEror = false;
       mailIsEror = false;
       passIsEror = false;
       confirmPassIsEror = false;
 
-      // Cek jika ada field yang kosong dan set error message yang sesuai
       if (namaPerusahaan.isEmpty) {
         CompanyNameErrorMessage = "Nama perusahaan tidak boleh kosong";
         CompanyNameIsEror = true;
@@ -296,7 +291,6 @@ class _registerHrdState extends State<register_hrd> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Top Wave SVG
             Positioned(
               top: 0,
               left: 0,
@@ -309,7 +303,6 @@ class _registerHrdState extends State<register_hrd> {
               ),
             ),
 
-            // Bottom Wave SVG
             Positioned(
               bottom: 0,
               right: 0,
@@ -319,11 +312,9 @@ class _registerHrdState extends State<register_hrd> {
               ),
             ),
 
-            // Foreground Content
             SafeArea(
               child: Column(
                 children: [
-                  // Top Back Button
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Padding(
@@ -350,7 +341,6 @@ class _registerHrdState extends State<register_hrd> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // 1. Card "Mendaftar sebagai Pencari Kerja?" di posisi paling atas dalam header merah
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 12),
@@ -443,7 +433,6 @@ class _registerHrdState extends State<register_hrd> {
 
                           const SizedBox(height: 26),
 
-                          // 2. Judul & Subtitle di area latar belakang putih (Center)
                           Center(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -475,10 +464,8 @@ class _registerHrdState extends State<register_hrd> {
                             ),
                           ),
 
-                          // 3. Spasi vertikal ~20px sebelum form input
                           const SizedBox(height: 20),
 
-                          // Nama Perusahaan
                           name_input(
                             nameInputController: CompanyNameController,
                             label: "Nama Perusahaan",
@@ -499,7 +486,6 @@ class _registerHrdState extends State<register_hrd> {
 
                           const SizedBox(height: 14),
 
-                          // Email
                           EmailInput(
                               emailController: EmailController,
                               isEror: mailIsEror,
@@ -519,7 +505,6 @@ class _registerHrdState extends State<register_hrd> {
 
                           const SizedBox(height: 14),
 
-                          // Password
                           PassInput(
                               controller: passwordController,
                               isEror: passIsEror),
@@ -537,7 +522,6 @@ class _registerHrdState extends State<register_hrd> {
 
                           const SizedBox(height: 14),
 
-                          // Confirm Password
                           ConfirmPassInput(
                             controller: confirmPasswordController,
                             isEror: confirmPassIsEror,
@@ -556,7 +540,6 @@ class _registerHrdState extends State<register_hrd> {
 
                           const SizedBox(height: 18),
 
-                          // Syarat & Ketentuan Checkbox
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -642,7 +625,6 @@ class _registerHrdState extends State<register_hrd> {
 
                           const SizedBox(height: 22),
 
-                          // Submit Button
                           SizedBox(
                             width: double.infinity,
                             height: 54,
@@ -680,7 +662,6 @@ class _registerHrdState extends State<register_hrd> {
 
                           const SizedBox(height: 24),
 
-                          // Login Link
                           Center(
                             child: RichText(
                               textAlign: TextAlign.center,
