@@ -3,14 +3,13 @@ import 'package:rekanpabrik/api/me_api.dart';
 import 'package:rekanpabrik/api/posting_pekerjaan_api.dart';
 import 'package:rekanpabrik/models/data_pelamar_pekerjaan.dart';
 import 'package:rekanpabrik/pages/hrd/detail_pelamar.dart';
-import 'package:rekanpabrik/pages/page.dart';
 import 'package:rekanpabrik/shared/shared.dart';
 
 class SearchBarPelamarPekerjaan extends StatefulWidget {
-  const SearchBarPelamarPekerjaan({Key? key}) : super(key: key);
+  const SearchBarPelamarPekerjaan({super.key});
 
   @override
-  _SearchBarPelamarPekerjaanState createState() =>
+  State<SearchBarPelamarPekerjaan> createState() =>
       _SearchBarPelamarPekerjaanState();
 }
 
@@ -57,21 +56,14 @@ class _SearchBarPelamarPekerjaanState extends State<SearchBarPelamarPekerjaan> {
 
   Future<void> _fetchPelamar() async {
     try {
-      print("========== FETCH PELAMAR ==========");
-
       int? companyId;
-
-      print("USER:");
-      print(user);
 
       if (user != null) {
         companyId = user['id_perusahaan'];
       }
 
-      print("COMPANY ID:");
-      print(companyId);
-
       if (companyId == null) {
+        if (!mounted) return;
         setState(() {
           _isLoading = false;
           _errorMessage = 'ID Perusahaan tidak ditemukan';
@@ -79,58 +71,35 @@ class _SearchBarPelamarPekerjaanState extends State<SearchBarPelamarPekerjaan> {
         return;
       }
 
-      print("REQUEST PELAMAR COMPANY ID: $companyId");
-
       var data = await Postingpekerjaanapi().getPelamarByCompanyId(companyId);
 
-      print("RESPONSE PELAMAR:");
-      print(data);
-
-      print("TOTAL DATA:");
-      print(data.length);
-
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
 
         if (data.isNotEmpty) {
-          print("STATUS API:");
-          print(data[0]['status']);
-
-          print("POSISI API:");
-          print(data[0]['posisi']);
-
-          print("FULL DATA PERTAMA:");
-          print(data[0]);
           resultsPelamar = data;
 
-          dataDitampilkan = resultsPelamar.take(5).map((user) {
+          dataDitampilkan = resultsPelamar.take(5).map((item) {
             return pelamarPekerjaan(
-              namaPerusahaan: user['nama_perusahaan'].toString(),
-              idPelamar: user['id_pelamar'],
-              firstName: user['first_name'].toString(),
-              lastName: user['last_name'].toString(),
-              email: user['email'].toString(),
-              linkCv: user['curriculum_vitae'].toString(),
-              fotoProfil: user['profile_pict'].toString(),
-              id_lamaran_pekerjaan: user['id_lamaran_pekerjaan'],
-              statusLamaran: user['status'].toString(),
-              posisiDilamar: user['posisi'].toString(),
+              namaPerusahaan: item['nama_perusahaan'].toString(),
+              idPelamar: item['id_pelamar'],
+              firstName: item['first_name'].toString(),
+              lastName: item['last_name'].toString(),
+              email: item['email'].toString(),
+              linkCv: item['curriculum_vitae'].toString(),
+              fotoProfil: item['profile_pict'].toString(),
+              id_lamaran_pekerjaan: item['id_lamaran_pekerjaan'],
+              statusLamaran: item['status'].toString(),
+              posisiDilamar: item['posisi'].toString(),
             );
           }).toList();
-          print("DATA USER:");
-          print(user);
-          print("DATA DITAMPILKAN:");
-          print(dataDitampilkan.length);
         } else {
-          print("DATA PELAMAR KOSONG");
           _errorMessage = 'Anda belum mendapatkan pelamar';
         }
       });
-    } catch (e, stackTrace) {
-      print("ERROR FETCH PELAMAR:");
-      print(e);
-      print(stackTrace);
-
+    } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
         _errorMessage =
@@ -165,7 +134,7 @@ class _SearchBarPelamarPekerjaanState extends State<SearchBarPelamarPekerjaan> {
       return Center(
         child: Text(
           _errorMessage,
-          style: TextStyle(color: Colors.red, fontSize: 16),
+          style: const TextStyle(color: Colors.red, fontSize: 16),
         ),
       );
     }
@@ -183,11 +152,11 @@ class _SearchBarPelamarPekerjaanState extends State<SearchBarPelamarPekerjaan> {
             },
             decoration: InputDecoration(
               hintText: "Cari Disini...",
-              hintStyle: TextStyle(color: Colors.grey),
-              prefixIcon: Icon(Icons.search, color: Colors.black),
+              hintStyle: const TextStyle(color: Colors.grey),
+              prefixIcon: const Icon(Icons.search, color: Colors.black),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.0),
-                borderSide: BorderSide(color: Colors.grey),
+                borderSide: const BorderSide(color: Colors.grey),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.0),
@@ -197,7 +166,7 @@ class _SearchBarPelamarPekerjaanState extends State<SearchBarPelamarPekerjaan> {
           ),
         ),
         resultsPelamar.isEmpty
-            ? Center(
+            ? const Center(
                 child: Text(
                   'Pelamar Not Found',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -220,7 +189,7 @@ class _SearchBarPelamarPekerjaanState extends State<SearchBarPelamarPekerjaan> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(pelamar.posisiDilamar),
-                            SizedBox(height: 5),
+                            const SizedBox(height: 5),
                             Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 4),
@@ -230,7 +199,7 @@ class _SearchBarPelamarPekerjaanState extends State<SearchBarPelamarPekerjaan> {
                               ),
                               child: Text(
                                 pelamar.statusLamaran,
-                                style: TextStyle(
+                                style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold),
                               ),
@@ -257,37 +226,37 @@ class _SearchBarPelamarPekerjaanState extends State<SearchBarPelamarPekerjaan> {
 
   List<pelamarPekerjaan> cariDataPelamar(String query) {
     if (query.isEmpty) {
-      return resultsPelamar.take(5).map((user) {
+      return resultsPelamar.take(5).map((item) {
         return pelamarPekerjaan(
-          namaPerusahaan: user['nama_perusahaan'].toString(),
-          idPelamar: user['id_pelamar'],
-          firstName: user['first_name'].toString(),
-          lastName: user['last_name'].toString(),
-          email: user['email'].toString(),
-          linkCv: user['curriculum_vitae'].toString(),
-          fotoProfil: user['profile_pict'].toString(),
-          statusLamaran: user['status'].toString(),
-          posisiDilamar: user['posisi'].toString(),
-          id_lamaran_pekerjaan: user['id_lamaran_pekerjaan'],
+          namaPerusahaan: item['nama_perusahaan'].toString(),
+          idPelamar: item['id_pelamar'],
+          firstName: item['first_name'].toString(),
+          lastName: item['last_name'].toString(),
+          email: item['email'].toString(),
+          linkCv: item['curriculum_vitae'].toString(),
+          fotoProfil: item['profile_pict'].toString(),
+          statusLamaran: item['status'].toString(),
+          posisiDilamar: item['posisi'].toString(),
+          id_lamaran_pekerjaan: item['id_lamaran_pekerjaan'],
         );
       }).toList();
     }
 
-    return resultsPelamar.where((user) {
-      var nama = user['first_name'] ?? '';
+    return resultsPelamar.where((item) {
+      var nama = item['first_name'] ?? '';
       return nama.toLowerCase().contains(query.toLowerCase());
-    }).map((user) {
+    }).map((item) {
       return pelamarPekerjaan(
-        namaPerusahaan: user['nama_perusahaan'].toString(),
-        idPelamar: user['id_pelamar'],
-        firstName: user['first_name'].toString(),
-        lastName: user['last_name'].toString(),
-        email: user['email'].toString(),
-        linkCv: user['curriculum_vitae'].toString(),
-        fotoProfil: user['profile_pict'].toString(),
-        statusLamaran: user['status'].toString(),
-        posisiDilamar: user['posisi'].toString(),
-        id_lamaran_pekerjaan: user['id_lamaran_pekerjaan'],
+        namaPerusahaan: item['nama_perusahaan'].toString(),
+        idPelamar: item['id_pelamar'],
+        firstName: item['first_name'].toString(),
+        lastName: item['last_name'].toString(),
+        email: item['email'].toString(),
+        linkCv: item['curriculum_vitae'].toString(),
+        fotoProfil: item['profile_pict'].toString(),
+        statusLamaran: item['status'].toString(),
+        posisiDilamar: item['posisi'].toString(),
+        id_lamaran_pekerjaan: item['id_lamaran_pekerjaan'],
       );
     }).toList();
   }

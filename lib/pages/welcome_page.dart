@@ -60,7 +60,6 @@ class _WellcomePageState extends State<WellcomePage> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // Top Wave SVG (Safely positioned below status bar inset)
               Positioned(
                 top: topSafeArea,
                 left: 0,
@@ -72,7 +71,6 @@ class _WellcomePageState extends State<WellcomePage> {
                 ),
               ),
 
-              // Bottom Wave SVG
               Positioned(
                 bottom: 0,
                 right: 0,
@@ -82,7 +80,6 @@ class _WellcomePageState extends State<WellcomePage> {
                 ),
               ),
 
-              // Foreground Content (Vertically centered with 24px horizontal padding)
               SafeArea(
                 child: LayoutBuilder(
                   builder: (context, constraints) {

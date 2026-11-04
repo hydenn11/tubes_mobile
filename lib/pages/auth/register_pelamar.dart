@@ -6,7 +6,6 @@ class register_pelamar extends StatefulWidget {
 }
 
 class _registerPelamarState extends State<register_pelamar> {
-  // VARIABLE
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   final TextEditingController EmailController = TextEditingController();
@@ -42,7 +41,6 @@ class _registerPelamarState extends State<register_pelamar> {
     _initializeNotifications();
   }
 
-  // FUNGSI
   bool isEmailValid(String email) {
     return email.contains('@');
   }
@@ -58,7 +56,6 @@ class _registerPelamarState extends State<register_pelamar> {
   Future<void> createAccount(String fullName, String username, String email,
       String password, String confirmPass) async {
     setState(() {
-      // Reset semua error messages
       fullNameErrorMessage = '';
       usernameErrorMessage = '';
       emailErrorMessage = '';
@@ -66,14 +63,12 @@ class _registerPelamarState extends State<register_pelamar> {
       confirmPassErrorMessage = '';
       termsErrorMessage = '';
 
-      // Reset status error
       fullNameIsEror = false;
       usernameIsEror = false;
       mailIsEror = false;
       passIsEror = false;
       confirmPassIsEror = false;
 
-      // Cek jika ada field yang kosong dan set error message yang sesuai
       if (fullName.isEmpty) {
         fullNameErrorMessage = "Nama lengkap tidak boleh kosong";
         fullNameIsEror = true;
@@ -320,7 +315,6 @@ class _registerPelamarState extends State<register_pelamar> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Top Wave SVG
             Positioned(
               top: 0,
               left: 0,
@@ -333,7 +327,6 @@ class _registerPelamarState extends State<register_pelamar> {
               ),
             ),
 
-            // Bottom Wave SVG
             Positioned(
               bottom: 0,
               right: 0,
@@ -343,11 +336,9 @@ class _registerPelamarState extends State<register_pelamar> {
               ),
             ),
 
-            // Foreground Content
             SafeArea(
               child: Column(
                 children: [
-                  // Top Back Button
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Padding(
@@ -374,7 +365,6 @@ class _registerPelamarState extends State<register_pelamar> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // 1. Card "Mendaftar sebagai Perusahaan?" di posisi paling atas dalam header merah
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 12),
@@ -462,7 +452,6 @@ class _registerPelamarState extends State<register_pelamar> {
 
                           const SizedBox(height: 26),
 
-                          // 2. Judul & Subtitle di area latar belakang putih (Center)
                           Center(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -494,10 +483,8 @@ class _registerPelamarState extends State<register_pelamar> {
                             ),
                           ),
 
-                          // 3. Spasi vertikal ~20px sebelum form input
                           const SizedBox(height: 20),
 
-                          // Nama Lengkap
                           name_input(
                             nameInputController: fullNameController,
                             label: "Nama Lengkap",
@@ -518,7 +505,6 @@ class _registerPelamarState extends State<register_pelamar> {
 
                           const SizedBox(height: 14),
 
-                          // Username
                           name_input(
                             nameInputController: usernameController,
                             label: "Username",
@@ -539,7 +525,6 @@ class _registerPelamarState extends State<register_pelamar> {
 
                           const SizedBox(height: 14),
 
-                          // Email
                           EmailInput(
                               emailController: EmailController,
                               isEror: mailIsEror),
@@ -557,7 +542,6 @@ class _registerPelamarState extends State<register_pelamar> {
 
                           const SizedBox(height: 14),
 
-                          // Password
                           PassInput(
                               controller: passwordController,
                               isEror: passIsEror),
@@ -575,7 +559,6 @@ class _registerPelamarState extends State<register_pelamar> {
 
                           const SizedBox(height: 14),
 
-                          // Confirm Password
                           ConfirmPassInput(
                             controller: confirmPasswordController,
                             isEror: confirmPassIsEror,
@@ -594,7 +577,6 @@ class _registerPelamarState extends State<register_pelamar> {
 
                           const SizedBox(height: 18),
 
-                          // Syarat & Ketentuan Checkbox
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -680,7 +662,6 @@ class _registerPelamarState extends State<register_pelamar> {
 
                           const SizedBox(height: 22),
 
-                          // Submit Button
                           SizedBox(
                             width: double.infinity,
                             height: 54,
@@ -720,7 +701,6 @@ class _registerPelamarState extends State<register_pelamar> {
 
                           const SizedBox(height: 24),
 
-                          // Login Link
                           Center(
                             child: RichText(
                               textAlign: TextAlign.center,

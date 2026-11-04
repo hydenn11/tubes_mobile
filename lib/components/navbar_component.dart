@@ -12,7 +12,6 @@ class _NavbarComponentState extends State<navbarComponent> {
   late List<Widget> _pages;
 
   Future<bool> _onWillPop() async {
-    // Disable back button functionality
     return false;
   }
 
@@ -20,7 +19,6 @@ class _NavbarComponentState extends State<navbarComponent> {
   void initState() {
     super.initState();
 
-    // Initialize the pages
     _pages = [
       home_pelamar(),
       const Caripekerjaan(),

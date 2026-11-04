@@ -62,7 +62,6 @@ class _CariPabrik extends State<CariPabrik> {
               ),
             ],
           )),
-      //bottomNavigationBar: navbarComponent(),
     );
   }
 }

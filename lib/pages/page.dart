@@ -14,7 +14,6 @@ import 'package:rekanpabrik/api/pelamar_api.dart';
 import 'package:rekanpabrik/api/perusahaan_api.dart';
 import 'package:rekanpabrik/api/posting_pekerjaan_api.dart';
 import 'package:rekanpabrik/api/saved_jobs_api.dart';
-import 'package:rekanpabrik/components/company_name_input.dart';
 import 'package:rekanpabrik/components/search_bar_pelamar_pekerjaan.dart';
 import 'package:rekanpabrik/pages/hrd/change_profile_page_perusahaan.dart';
 import 'package:rekanpabrik/pages/hrd/reset_pass_perusahaan.dart';
@@ -28,13 +27,10 @@ import 'package:url_launcher/url_launcher.dart';
 // COMPONENTS
 import 'package:rekanpabrik/components/carousel.dart';
 import 'package:rekanpabrik/components/confirm_pass_input.dart';
-import 'package:rekanpabrik/components/container_home_pelamar.dart';
 import 'package:rekanpabrik/components/email_input.dart';
 import 'package:rekanpabrik/components/name_input.dart';
 import 'package:rekanpabrik/components/pass_input.dart';
 import 'package:rekanpabrik/components/search_bar_cari_pabrik.dart';
-import 'package:rekanpabrik/components/search_bar_cari_pekerjaan.dart';
-import 'package:rekanpabrik/components/search_bar_riwayat_lamaran.dart';
 import 'package:rekanpabrik/components/search_bar_saved_jobs.dart';
 
 // THEMES

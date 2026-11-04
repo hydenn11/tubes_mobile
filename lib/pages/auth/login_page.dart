@@ -113,7 +113,6 @@ class _loginPageState extends State<login_page> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Top Wave SVG
             Positioned(
               top: 0,
               left: 0,
@@ -126,7 +125,6 @@ class _loginPageState extends State<login_page> {
               ),
             ),
 
-            // Bottom Wave SVG
             Positioned(
               bottom: 0,
               right: 0,
@@ -136,11 +134,9 @@ class _loginPageState extends State<login_page> {
               ),
             ),
 
-            // Foreground Content
             SafeArea(
               child: Column(
                 children: [
-                  // Top Back Button
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Padding(
@@ -203,7 +199,6 @@ class _loginPageState extends State<login_page> {
 
                           const SizedBox(height: 24),
 
-              // Form Inputs
               EmailInput(
                 emailController: EmailController,
                 isEror: mailIsEror,
@@ -282,7 +277,6 @@ class _loginPageState extends State<login_page> {
 
               const SizedBox(height: 32),
 
-              // Tombol Masuk
               SizedBox(
                 width: double.infinity,
                 height: 54,
@@ -320,7 +314,6 @@ class _loginPageState extends State<login_page> {
 
               const SizedBox(height: 40),
 
-              // Footer Register Link
               Center(
                 child: RichText(
                   textAlign: TextAlign.center,
