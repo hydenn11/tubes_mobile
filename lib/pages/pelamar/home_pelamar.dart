@@ -153,11 +153,6 @@ class _homePelamar extends State<home_pelamar> {
               // 1. HEADER PROFIL PENGGUNA & NOTIFIKASI
               _buildTopHeader(userName),
 
-              const SizedBox(height: 18),
-
-              // 2. SEARCH BAR PENCARIAN PABRIK
-              _buildSearchBar(),
-
               const SizedBox(height: 24),
 
               // 3. SECTION LAMARAN ANDA (CARD GELAP ALA REFERENSI)
@@ -337,66 +332,6 @@ class _homePelamar extends State<home_pelamar> {
     );
   }
 
-  // 2. SEARCH BAR
-  Widget _buildSearchBar() {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const Caripekerjaan()),
-          );
-        },
-        borderRadius: BorderRadius.circular(16),
-        splashColor: darkMaroon.withValues(alpha: 0.08),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFCBD5E1)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.search_rounded,
-                  color: Color(0xFF475569), size: 22),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Text(
-                  "Cari posisi, keahlian pabrik, atau nama PT...",
-                  style: TextStyle(
-                    fontFamily: 'poppins',
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF475569),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: darkMaroon.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(Icons.tune_rounded, color: darkMaroon, size: 18),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   // 3. SECTION LAMARAN ANDA (CARD GELAP KONSISTEN DENGAN REFERENSI)
   Widget _buildApplicationStatusCard() {
@@ -434,7 +369,8 @@ class _homePelamar extends State<home_pelamar> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const riwayatLamaran()),
+                        builder: (context) =>
+                            const riwayatLamaran(showBackButton: true)),
                   );
                 },
                 borderRadius: BorderRadius.circular(8),
@@ -517,7 +453,7 @@ class _homePelamar extends State<home_pelamar> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (_) => const Caripekerjaan()),
+                                builder: (_) => const Caripekerjaan(showBackButton: true)),
                           );
                         },
                         icon: const Icon(Icons.search_rounded, size: 16),
@@ -568,7 +504,8 @@ class _homePelamar extends State<home_pelamar> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const riwayatLamaran()),
+                            builder: (context) =>
+                                const riwayatLamaran(showBackButton: true)),
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -620,6 +557,13 @@ class _homePelamar extends State<home_pelamar> {
         (app['nama_perusahaan'] ?? 'PT Manufaktur').toString();
     final String posisi = (app['posisi'] ?? 'Operator Produksi').toString();
 
+    final String shortName = companyName
+        .replaceAll('PT ', '')
+        .replaceAll(' Tbk', '')
+        .split(' ')
+        .first
+        .toUpperCase();
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
@@ -645,20 +589,34 @@ class _homePelamar extends State<home_pelamar> {
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   child: Row(
                     children: [
-                      // Factory Icon / Avatar
+                      // Company Logo Box (Konsisten dengan Rekomendasi, Riwayat Lamaran & Lowongan)
                       Container(
-                        width: 40,
-                        height: 40,
+                        width: 60,
+                        height: 44,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 4),
                         decoration: BoxDecoration(
                           color: const Color(0xFFF8FAFC),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color(0xFFCBD5E1),
+                            width: 1.1,
+                          ),
                         ),
-                        child: Icon(
-                          Icons.factory_rounded,
-                          color:
-                              isDiterima ? const Color(0xFF10B981) : darkMaroon,
-                          size: 22,
+                        child: Center(
+                          child: Text(
+                            shortName,
+                            style: TextStyle(
+                              fontFamily: 'poppins',
+                              fontSize: 11,
+                              fontWeight: FontWeight.w900,
+                              color: darkMaroon,
+                              letterSpacing: 0.5,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -791,7 +749,7 @@ class _homePelamar extends State<home_pelamar> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const Caripekerjaan()),
+                        builder: (context) => const Caripekerjaan(showBackButton: true)),
                   );
                 },
                 borderRadius: BorderRadius.circular(8),
@@ -1314,7 +1272,7 @@ class _homePelamar extends State<home_pelamar> {
                   Navigator.pop(context);
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const riwayatLamaran()),
+                    MaterialPageRoute(builder: (_) => const riwayatLamaran(showBackButton: true)),
                   );
                 },
               ),

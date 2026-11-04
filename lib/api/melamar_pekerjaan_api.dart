@@ -31,6 +31,33 @@ class MelamarPekerjaanapi {
       'first_name': 'Rafif',
       'last_name': 'Purnomo',
     },
+    {
+      'id_lamaran_pekerjaan': 4,
+      'nama_perusahaan': 'PT Unilever Indonesia Tbk',
+      'posisi': 'Operator Line Packaging',
+      'status_lamaran': 'diproses',
+      'createdAt': '2024-10-05T09:15:00.000',
+      'first_name': 'Rafif',
+      'last_name': 'Purnomo',
+    },
+    {
+      'id_lamaran_pekerjaan': 5,
+      'nama_perusahaan': 'PT Kalbe Farma Tbk',
+      'posisi': 'Operator Produksi Farmasi',
+      'status_lamaran': 'diterima',
+      'createdAt': '2024-10-02T11:00:00.000',
+      'first_name': 'Rafif',
+      'last_name': 'Purnomo',
+    },
+    {
+      'id_lamaran_pekerjaan': 6,
+      'nama_perusahaan': 'PT Denso Indonesia',
+      'posisi': 'Teknisi Stamping & Tooling',
+      'status_lamaran': 'ditolak',
+      'createdAt': '2024-09-28T16:30:00.000',
+      'first_name': 'Rafif',
+      'last_name': 'Purnomo',
+    },
   ];
 
   Future<String?> _getToken() async {

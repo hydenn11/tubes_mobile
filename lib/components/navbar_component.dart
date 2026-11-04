@@ -23,8 +23,8 @@ class _NavbarComponentState extends State<navbarComponent> {
     // Initialize the pages
     _pages = [
       home_pelamar(),
-      savedJobs(),
-      riwayatLamaran(),
+      const Caripekerjaan(),
+      const riwayatLamaran(),
       ProfilePage(),
     ];
   }
@@ -66,8 +66,8 @@ class _NavbarComponentState extends State<navbarComponent> {
                     label: 'Beranda',
                   ),
                   BottomNavigationBarItem(
-                    icon: _buildIcon(Icons.bookmark_border_rounded, Icons.bookmark_rounded, 1),
-                    label: 'Tersimpan',
+                    icon: _buildIcon(Icons.work_outline_rounded, Icons.work_rounded, 1),
+                    label: 'Lowongan',
                   ),
                   BottomNavigationBarItem(
                     icon: _buildIcon(Icons.assignment_outlined, Icons.assignment_rounded, 2),
