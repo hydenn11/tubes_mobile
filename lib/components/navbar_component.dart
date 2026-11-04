@@ -23,9 +23,8 @@ class _NavbarComponentState extends State<navbarComponent> {
     // Initialize the pages
     _pages = [
       home_pelamar(),
-      Caripekerjaan(),
-      savedJobs(),
-      riwayatLamaran(),
+      const Caripekerjaan(),
+      const riwayatLamaran(),
       ProfilePage(),
     ];
   }
@@ -67,19 +66,15 @@ class _NavbarComponentState extends State<navbarComponent> {
                     label: 'Beranda',
                   ),
                   BottomNavigationBarItem(
-                    icon: _buildIcon(Icons.search_rounded, Icons.search_rounded, 1),
-                    label: 'Cari Lowongan',
+                    icon: _buildIcon(Icons.work_outline_rounded, Icons.work_rounded, 1),
+                    label: 'Lowongan',
                   ),
                   BottomNavigationBarItem(
-                    icon: _buildIcon(Icons.bookmark_border_rounded, Icons.bookmark_rounded, 2),
-                    label: 'Tersimpan',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: _buildIcon(Icons.assignment_outlined, Icons.assignment_rounded, 3),
+                    icon: _buildIcon(Icons.assignment_outlined, Icons.assignment_rounded, 2),
                     label: 'Lamaran',
                   ),
                   BottomNavigationBarItem(
-                    icon: _buildIcon(Icons.person_outline_rounded, Icons.person_rounded, 4),
+                    icon: _buildIcon(Icons.person_outline_rounded, Icons.person_rounded, 3),
                     label: 'Profil',
                   ),
                 ],
@@ -88,7 +83,7 @@ class _NavbarComponentState extends State<navbarComponent> {
                   fontFamily: 'poppins',
                   fontWeight: FontWeight.w700,
                   fontSize: 11,
-                  color: thirdColor,
+                  color: darkMaroon,
                 ),
                 unselectedLabelStyle: TextStyle(
                   fontFamily: 'poppins',
@@ -96,7 +91,7 @@ class _NavbarComponentState extends State<navbarComponent> {
                   fontSize: 11,
                   color: greyColor,
                 ),
-                selectedItemColor: thirdColor,
+                selectedItemColor: darkMaroon,
                 unselectedItemColor: greyColor,
                 onTap: _onItemTapped,
                 elevation: 0,
@@ -111,15 +106,15 @@ class _NavbarComponentState extends State<navbarComponent> {
   Widget _buildIcon(IconData unselectedIcon, IconData selectedIcon, int index) {
     final bool isSelected = _selectedIndex == index;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
       decoration: BoxDecoration(
-        color: isSelected ? secondaryCoolor : Colors.transparent,
+        color: isSelected ? darkMaroon.withOpacity(0.12) : Colors.transparent,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Icon(
         isSelected ? selectedIcon : unselectedIcon,
         size: 22,
-        color: isSelected ? thirdColor : greyColor,
+        color: isSelected ? darkMaroon : greyColor,
       ),
     );
   }

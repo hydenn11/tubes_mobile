@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:rekanpabrik/components/hrd_navbar_component.dart';
@@ -20,12 +21,20 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      scrollBehavior: const MaterialScrollBehavior().copyWith(
+        dragDevices: {
+          PointerDeviceKind.touch,
+          PointerDeviceKind.mouse,
+          PointerDeviceKind.trackpad,
+          PointerDeviceKind.stylus,
+        },
+      ),
       theme: ThemeData(
           fontFamily: 'poppins',
           canvasColor: thirdColor,
           primaryColor: primaryColor,
           appBarTheme: AppBarTheme(backgroundColor: primaryColor),
-          bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
             backgroundColor: Colors.transparent,
             selectedItemColor: Colors.black,
             unselectedItemColor: Colors.white,
