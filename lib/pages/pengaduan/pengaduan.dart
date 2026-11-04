@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:rekanpabrik/api/me_api.dart';
-import 'package:rekanpabrik/api/pengaduan_api.dart';
+import 'package:rekanpabrik/pages/pengaduan/kirim_pengaduan.dart';
 import 'package:rekanpabrik/shared/shared.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Pengaduan extends StatefulWidget {
   const Pengaduan({super.key});
@@ -12,431 +12,384 @@ class Pengaduan extends StatefulWidget {
 }
 
 class _PengaduanState extends State<Pengaduan> {
-  final TextEditingController firstNameController = TextEditingController();
-  final TextEditingController lastNameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController messageController = TextEditingController();
+  static const Color _backgroundColor = Color(0xFFF8FAFC);
+  static const Color _primaryColor = Color(0xFF7B1E2B);
+  static const Color _textColor = Color(0xFF1E293B);
+  static const Color _secondaryTextColor = Color(0xFF64748B);
+  static const Color _borderColor = Color(0xFFE2E8F0);
 
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-
-  bool isLoading = false;
-  String errorMessage = '';
+  String? _whatsappUrl;
+  bool _isOpeningWhatsApp = false;
 
   @override
   void initState() {
     super.initState();
-    _initUser();
-    _initializeNotifications();
+    _whatsappUrl = dotenv.env['WA_URL'];
   }
 
-  @override
-  void dispose() {
-    firstNameController.dispose();
-    lastNameController.dispose();
-    emailController.dispose();
-    phoneController.dispose();
-    messageController.dispose();
-    super.dispose();
+  void _showMessage(String message) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            message,
+            style: const TextStyle(
+              fontFamily: 'poppins',
+              fontSize: 12,
+            ),
+          ),
+          backgroundColor: const Color(0xFFDC2626),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(16),
+        ),
+      );
   }
 
-  Future<void> _initUser() async {
-    try {
-      final response = await meAPI().getUserProfile();
-      if (response['status'] == true && response['data'] != null) {
-        final data = response['data'];
-        if (!mounted) return;
-        setState(() {
-          if (firstNameController.text.isEmpty) {
-            firstNameController.text =
-                (data['first_name'] ?? data['nama_perusahaan'] ?? '').toString();
-          }
-          if (lastNameController.text.isEmpty) {
-            lastNameController.text = (data['last_name'] ?? '').toString();
-          }
-          if (emailController.text.isEmpty) {
-            emailController.text = (data['email'] ?? '').toString();
-          }
-          if (phoneController.text.isEmpty) {
-            phoneController.text =
-                (data['phone'] ?? data['no_telp'] ?? data['nomor_telepon'] ?? '')
-                    .toString();
-          }
-        });
-      }
-    } catch (_) {}
-  }
+  Future<void> _launchWhatsApp() async {
+    if (_isOpeningWhatsApp) return;
 
-  void _initializeNotifications() async {
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    final String? url = _whatsappUrl?.trim();
 
-    const InitializationSettings initializationSettings =
-        InitializationSettings(
-      android: initializationSettingsAndroid,
-    );
-
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  }
-
-  void _showNotification() async {
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-      'complaint_channel',
-      'Pengaduan & Bantuan',
-      channelDescription: 'Notifikasi status pengaduan pelanggan',
-      importance: Importance.high,
-      priority: Priority.high,
-      ticker: 'ticker',
-    );
-
-    const NotificationDetails platformDetails =
-        NotificationDetails(android: androidDetails);
-
-    await flutterLocalNotificationsPlugin.show(
-      1,
-      'Pengaduan Terkirim',
-      'Terima kasih! Pesan atau pertanyaan Anda telah kami terima dan akan segera ditindaklanjuti.',
-      platformDetails,
-    );
-  }
-
-  InputDecoration _inputDeco({
-    required String label,
-    required String hint,
-  }) {
-    return InputDecoration(
-      labelText: label,
-      hintText: hint,
-      hintStyle: const TextStyle(
-        fontFamily: 'poppins',
-        fontSize: 13,
-        color: Color(0xFF94A3B8),
-      ),
-      labelStyle: const TextStyle(
-        fontFamily: 'poppins',
-        fontSize: 13,
-        color: Color(0xFF64748B),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: darkMaroon, width: 1.5),
-      ),
-    );
-  }
-
-  Future<void> _submitComplaint() async {
-    final firstName = firstNameController.text.trim();
-    final lastName = lastNameController.text.trim();
-    final email = emailController.text.trim();
-    final phone = phoneController.text.trim();
-    final message = messageController.text.trim();
-
-    setState(() {
-      errorMessage = '';
-    });
-
-    if (firstName.isEmpty || email.isEmpty || message.isEmpty) {
-      setState(() {
-        errorMessage = 'Nama, email, dan pesan pengaduan wajib diisi.';
-      });
+    if (url == null || url.isEmpty || url == 'null') {
+      _showMessage('Link WhatsApp belum tersedia.');
       return;
     }
 
-    if (!email.contains('@')) {
-      setState(() {
-        errorMessage = 'Format email tidak valid.';
-      });
+    final Uri? uri = Uri.tryParse(url);
+
+    if (uri == null ||
+        !uri.hasScheme ||
+        (uri.scheme != 'https' && uri.scheme != 'http')) {
+      _showMessage('Link WhatsApp tidak valid.');
       return;
     }
 
     setState(() {
-      isLoading = true;
+      _isOpeningWhatsApp = true;
     });
 
     try {
-      final bool status = await Pengaduanapi().kirimPengaduan(
-        firstName,
-        lastName,
-        email,
-        phone,
-        message,
+      final bool launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
       );
 
-      if (!mounted) return;
-      setState(() {
-        isLoading = false;
-      });
-
-      if (status) {
-        messageController.clear();
-        _showNotification();
-
-        showDialog(
-          context: context,
-          builder: (dialogCtx) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              title: Text(
-                "Pengaduan Terkirim",
-                style: TextStyle(
-                  fontFamily: 'poppins',
-                  fontWeight: FontWeight.bold,
-                  color: blackColor,
-                ),
-              ),
-              content: const Text(
-                "Pesan pengaduan Anda berhasil dikirim ke tim Customer Service. Kami akan menindaklanjutinya secepat mungkin.",
-                style: TextStyle(
-                  fontFamily: 'poppins',
-                  fontSize: 13,
-                  height: 1.4,
-                ),
-              ),
-              actions: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(dialogCtx).pop();
-                    Navigator.of(context).pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: darkMaroon,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    "Selesai",
-                    style: TextStyle(fontFamily: 'poppins'),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Gagal mengirim pengaduan. Silakan coba lagi."),
-          ),
-        );
+      if (!launched && mounted) {
+        _showMessage('Tidak dapat membuka WhatsApp.');
       }
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Terjadi kesalahan: $e")),
-      );
+      if (mounted) {
+        _showMessage('Terjadi kesalahan saat membuka WhatsApp.');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isOpeningWhatsApp = false;
+        });
+      }
     }
+  }
+
+  Widget _buildContactCard({
+    required IconData icon,
+    required String title,
+    required String description,
+    required String buttonText,
+    required Color accentColor,
+    required VoidCallback onPressed,
+    bool isLoading = false,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: _borderColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.025),
+            blurRadius: 14,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: accentColor.withOpacity(0.10),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Icon(
+                  icon,
+                  color: accentColor,
+                  size: 27,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: accentColor.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  title == 'Live Chat' ? 'WhatsApp' : 'Formulir',
+                  style: TextStyle(
+                    fontFamily: 'poppins',
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: accentColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          Text(
+            title,
+            style: const TextStyle(
+              fontFamily: 'poppins',
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: _textColor,
+            ),
+          ),
+          const SizedBox(height: 7),
+          Text(
+            description,
+            style: const TextStyle(
+              fontFamily: 'poppins',
+              fontSize: 11,
+              color: _secondaryTextColor,
+              height: 1.6,
+            ),
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            height: 46,
+            child: ElevatedButton(
+              onPressed: isLoading ? null : onPressed,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: accentColor,
+                disabledBackgroundColor: accentColor.withOpacity(0.6),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: isLoading
+                  ? const SizedBox(
+                      width: 19,
+                      height: 19,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          icon,
+                          size: 17,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 9),
+                        Text(
+                          buttonText,
+                          style: const TextStyle(
+                            fontFamily: 'poppins',
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 7),
+                        const Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: _backgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: blackColor,
-            size: 20,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          "Customer Service",
+        backgroundColor: _primaryColor,
+        foregroundColor: Colors.white,
+        centerTitle: false,
+        title: const Text(
+          'Customer Service',
           style: TextStyle(
             fontFamily: 'poppins',
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: blackColor,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
           ),
         ),
       ),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          children: [
-            Text(
-              "Pusat Bantuan & Pengaduan",
-              style: TextStyle(
-                fontFamily: 'poppins',
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: blackColor,
-              ),
-            ),
-            const SizedBox(height: 6),
-            const Text(
-              "Sampaikan kendala, pertanyaan, atau laporan Anda terkait lowongan maupun penggunaan aplikasi.",
-              style: TextStyle(
-                fontFamily: 'poppins',
-                fontSize: 13,
-                color: Color(0xFF64748B),
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: firstNameController,
-                    style: const TextStyle(fontFamily: 'poppins', fontSize: 13),
-                    decoration: _inputDeco(
-                      label: 'Nama Depan',
-                      hint: 'Depan',
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 22, 20, 30),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(22),
+                decoration: BoxDecoration(
+                  color: _primaryColor,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.14),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: const Icon(
+                        Icons.support_agent_rounded,
+                        color: Colors.white,
+                        size: 30,
+                      ),
                     ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextField(
-                    controller: lastNameController,
-                    style: const TextStyle(fontFamily: 'poppins', fontSize: 13),
-                    decoration: _inputDeco(
-                      label: 'Nama Belakang',
-                      hint: 'Belakang',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-
-            TextField(
-              controller: emailController,
-              keyboardType: TextInputType.emailAddress,
-              style: const TextStyle(fontFamily: 'poppins', fontSize: 13),
-              decoration: _inputDeco(
-                label: 'Alamat Email',
-                hint: 'nama@email.com',
-              ),
-            ),
-            const SizedBox(height: 14),
-
-            TextField(
-              controller: phoneController,
-              keyboardType: TextInputType.phone,
-              style: const TextStyle(fontFamily: 'poppins', fontSize: 13),
-              decoration: _inputDeco(
-                label: 'Nomor Telepon (Opsional)',
-                hint: '08xxxxxxxxxx',
-              ),
-            ),
-            const SizedBox(height: 14),
-
-            TextField(
-              controller: messageController,
-              maxLines: 4,
-              style: const TextStyle(fontFamily: 'poppins', fontSize: 13),
-              decoration: InputDecoration(
-                labelText: 'Isi Pesan / Pengaduan',
-                hintText: 'Tuliskan detail kendala atau pengaduan Anda di sini...',
-                hintStyle: const TextStyle(
-                  fontFamily: 'poppins',
-                  fontSize: 13,
-                  color: Color(0xFF94A3B8),
-                ),
-                labelStyle: const TextStyle(
-                  fontFamily: 'poppins',
-                  fontSize: 13,
-                  color: Color(0xFF64748B),
-                ),
-                alignLabelWithHint: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 14,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: darkMaroon, width: 1.5),
-                ),
-              ),
-            ),
-
-            if (errorMessage.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Icon(Icons.error_outline_rounded,
-                      size: 15, color: dangerColor),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      errorMessage,
+                    const SizedBox(height: 18),
+                    const Text(
+                      'Hubungi Customer Service Kami',
                       style: TextStyle(
                         fontFamily: 'poppins',
-                        fontSize: 12,
-                        color: dangerColor,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 9),
+                    const Text(
+                      'Kami siap membantu menjawab pertanyaan, menangani kendala, dan menerima masukan Anda. Silakan pilih layanan yang sesuai dengan kebutuhan.',
+                      style: TextStyle(
+                        fontFamily: 'poppins',
+                        fontSize: 11,
+                        color: Colors.white70,
+                        height: 1.7,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ],
-
-            const SizedBox(height: 28),
-
-            SizedBox(
-              height: 48,
-              child: ElevatedButton(
-                onPressed: isLoading ? null : _submitComplaint,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: darkMaroon,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+              const SizedBox(height: 25),
+              const Text(
+                'Pilih Layanan',
+                style: TextStyle(
+                  fontFamily: 'poppins',
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: _textColor,
+                ),
+              ),
+              const SizedBox(height: 5),
+              const Text(
+                'Tentukan cara yang paling nyaman untuk menghubungi kami.',
+                style: TextStyle(
+                  fontFamily: 'poppins',
+                  fontSize: 10,
+                  color: _secondaryTextColor,
+                ),
+              ),
+              const SizedBox(height: 17),
+              _buildContactCard(
+                icon: Icons.chat_rounded,
+                title: 'Live Chat',
+                description:
+                    'Hubungi tim kami secara langsung melalui WhatsApp untuk mendapatkan bantuan dan jawaban atas pertanyaan Anda.',
+                buttonText: 'Hubungi via WhatsApp',
+                accentColor: const Color(0xFF16A34A),
+                isLoading: _isOpeningWhatsApp,
+                onPressed: _launchWhatsApp,
+              ),
+              const SizedBox(height: 16),
+              _buildContactCard(
+                icon: Icons.email_outlined,
+                title: 'Kirim Pengaduan',
+                description:
+                    'Sampaikan keluhan, kendala, atau saran Anda melalui formulir pengaduan. Tim kami akan meninjau laporan tersebut.',
+                buttonText: 'Buat Pengaduan',
+                accentColor: _primaryColor,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const KirimPengaduan(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 22),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFFBEB),
+                  borderRadius: BorderRadius.circular(13),
+                  border: Border.all(
+                    color: const Color(0xFFFDE68A),
                   ),
                 ),
-                child: isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text(
-                        'Kirim Pengaduan',
+                child: const Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.info_outline_rounded,
+                      color: Color(0xFFD97706),
+                      size: 19,
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Pastikan Anda menyampaikan informasi yang jelas agar tim kami dapat membantu menyelesaikan kendala dengan lebih tepat.',
                         style: TextStyle(
                           fontFamily: 'poppins',
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                          color: Color(0xFF92400E),
+                          height: 1.6,
                         ),
                       ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-          ],
+            ],
+          ),
         ),
       ),
     );

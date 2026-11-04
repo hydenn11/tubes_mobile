@@ -16,7 +16,7 @@ import 'package:rekanpabrik/api/posting_pekerjaan_api.dart';
 import 'package:rekanpabrik/api/saved_jobs_api.dart';
 import 'package:rekanpabrik/components/search_bar_pelamar_pekerjaan.dart';
 import 'package:rekanpabrik/pages/hrd/change_profile_page_perusahaan.dart';
-import 'package:rekanpabrik/pages/hrd/reset_pass_perusahaan.dart';
+import 'package:rekanpabrik/pages/hrd/reset_pass_perusahaan.dart' hide Changeprofilepageperusahaan;
 import 'package:rekanpabrik/pages/auth/lupa_password.dart';
 import 'package:rekanpabrik/pages/pelamar/change_profile_page_pelamar.dart';
 import 'package:rekanpabrik/pages/pelamar/reset_pass_pelamar.dart';

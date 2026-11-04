@@ -51,64 +51,112 @@ class _HRDnavbarComponentState extends State<HRDnavbarComponent> {
         resizeToAvoidBottomInset: false,
         body: _buildPage(_selectedIndex),
         bottomNavigationBar: Container(
-          height: 90,
           decoration: BoxDecoration(
-            color: primaryColor,
+            color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                spreadRadius: 3,
-                blurRadius: 10,
+                color: Colors.black.withOpacity(0.06),
+                spreadRadius: 0,
+                blurRadius: 20,
+                offset: const Offset(0, -4),
               ),
             ],
           ),
-          child: BottomNavigationBar(
-            backgroundColor: primaryColor,
-            items: <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: _buildIcon(Icons.home, 0),
-                label: 'Home',
+          child: SafeArea(
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 6,
               ),
-              BottomNavigationBarItem(
-                icon: _buildIcon(Icons.search, 1),
-                label: 'Applicant',
+              child: BottomNavigationBar(
+                type: BottomNavigationBarType.fixed,
+                backgroundColor: Colors.white,
+                items: <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                    icon: _buildIcon(
+                      Icons.home_outlined,
+                      Icons.home_rounded,
+                      0,
+                    ),
+                    label: 'Home',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: _buildIcon(
+                      Icons.people_outline_rounded,
+                      Icons.people_rounded,
+                      1,
+                    ),
+                    label: 'Applicant',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: _buildIcon(
+                      Icons.work_outline_rounded,
+                      Icons.work_rounded,
+                      2,
+                    ),
+                    label: 'Post a Job',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: _buildIcon(
+                      Icons.history_rounded,
+                      Icons.history_rounded,
+                      3,
+                    ),
+                    label: 'History',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: _buildIcon(
+                      Icons.person_outline_rounded,
+                      Icons.person_rounded,
+                      4,
+                    ),
+                    label: 'Profile',
+                  ),
+                ],
+                currentIndex: _selectedIndex,
+                selectedLabelStyle: const TextStyle(
+                  fontFamily: 'poppins',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 11,
+                ),
+                unselectedLabelStyle: const TextStyle(
+                  fontFamily: 'poppins',
+                  fontWeight: FontWeight.w500,
+                  fontSize: 11,
+                ),
+                selectedItemColor: darkMaroon,
+                unselectedItemColor: greyColor,
+                onTap: _onItemTapped,
+                elevation: 0,
               ),
-              BottomNavigationBarItem(
-                icon: _buildIcon(Icons.bookmark, 2),
-                label: 'Post a job',
-              ),
-              BottomNavigationBarItem(
-                icon: _buildIcon(Icons.history, 3),
-                label: 'History',
-              ),
-              BottomNavigationBarItem(
-                icon: _buildIcon(Icons.person, 4),
-                label: 'Profile',
-              ),
-            ],
-            currentIndex: _selectedIndex,
-            selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Colors.white,
-            onTap: _onItemTapped,
-            elevation: 0,
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildIcon(IconData iconData, int index) {
+  Widget _buildIcon(
+    IconData unselectedIcon,
+    IconData selectedIcon,
+    int index,
+  ) {
+    final bool isSelected = _selectedIndex == index;
+
     return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: _selectedIndex == index
-            ? Colors.white
-            : Colors.transparent,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: 4,
       ),
-      padding: EdgeInsets.all(8.0),
-      child: Icon(iconData,
-          size: 25, color: _selectedIndex == index ? thirdColor : Colors.white),
+      decoration: BoxDecoration(
+        color: isSelected ? darkMaroon.withOpacity(0.12) : Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Icon(
+        isSelected ? selectedIcon : unselectedIcon,
+        size: 22,
+        color: isSelected ? darkMaroon : greyColor,
+      ),
     );
   }
 

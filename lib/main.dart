@@ -5,12 +5,17 @@ import 'package:rekanpabrik/components/hrd_navbar_component.dart';
 import 'package:rekanpabrik/components/navbar_component.dart';
 import 'package:rekanpabrik/pages/page.dart';
 import 'package:rekanpabrik/shared/shared.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await initializeDateFormatting('id_ID', null);
+
   try {
     await dotenv.load(fileName: ".env");
   } catch (_) {}
+
   runApp(const MyApp());
 }
 

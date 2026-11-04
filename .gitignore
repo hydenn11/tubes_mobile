@@ -49,4 +49,7 @@ android/app/.cxx/
 .env.staging
 # Backend ignore
 backend/
-_backend_backup/
+_backend_backup/
+
+# Local Git push script
+push.ps1
