@@ -165,7 +165,6 @@ class _loginPageState extends State<login_page> {
                         children: [
                           const SizedBox(height: 50),
 
-                          // Judul & Subtitle di area latar belakang putih (Center)
                           Center(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,

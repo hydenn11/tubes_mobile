@@ -158,7 +158,6 @@ class _DetailPerusahaanState extends State<DetailPerusahaan> {
                                 fontSize: 20, fontWeight: FontWeight.w400),
                           ),
                           SizedBox(height: 20),
-                          // Container untuk jumlah lowongan
                           Container(
                             padding: EdgeInsets.symmetric(
                                 horizontal: 10,

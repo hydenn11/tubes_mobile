@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class meAPI {
@@ -15,6 +16,14 @@ class meAPI {
     final namaPerusahaan = prefs.getString('user_nama_perusahaan') ?? name;
     final alamat = prefs.getString('user_alamat') ?? 'Kawasan Industri MM2100 Blok C-4, Cikarang Barat';
     final about = prefs.getString('user_about') ?? '$namaPerusahaan adalah perusahaan manufaktur komponen presisi dan perakitan mekanikal terkemuka di Indonesia.';
+
+    final cvPath = prefs.getString('user_curriculum_vitae');
+    final cvName = prefs.getString('user_cv') ??
+        (cvPath != null
+            ? cvPath.split(RegExp(r'[\\/]')).last
+            : null);
+    final phone = prefs.getString('user_phone');
+    final profilePict = prefs.getString('user_profile_pict') ?? 'assets/img/defaultPict.png';
 
     if (role == 'perusahaan' || role == 'hrd') {
       return {
@@ -50,12 +59,14 @@ class meAPI {
           'username': username,
           'email': email,
           'alamat': 'Jl. Industri Manufaktur No. 10, Cikarang',
-          'phone': '081234567890',
+          'phone': phone,
           'aboutMe': 'Operator produksi berpengalaman dengan sertifikasi K3.',
           'about_me': 'Operator produksi berpengalaman dengan sertifikasi K3.',
-          'profile_pict': 'assets/img/defaultPict.png',
-          'img': 'assets/img/defaultPict.png',
-          'cv': 'CV_Rafif_Purnomo.pdf',
+          'profile_pict': profilePict,
+          'img': profilePict,
+          'curriculum_vitae': cvPath ?? cvName,
+          'cv_path': cvPath ?? cvName,
+          'cv': cvName ?? cvPath,
         }
       };
     }

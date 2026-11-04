@@ -22,6 +22,8 @@ class Pelamarapi {
     required File imagePath,
   }) async {
     await Future.delayed(const Duration(milliseconds: 200));
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_profile_pict', imagePath.path);
     return true;
   }
 
@@ -30,6 +32,10 @@ class Pelamarapi {
     required File imagePath,
   }) async {
     await Future.delayed(const Duration(milliseconds: 200));
+    final prefs = await SharedPreferences.getInstance();
+    final fileName = imagePath.path.split(Platform.pathSeparator).last;
+    await prefs.setString('user_cv', fileName);
+    await prefs.setString('user_curriculum_vitae', imagePath.path);
     return true;
   }
 

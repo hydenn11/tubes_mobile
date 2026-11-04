@@ -202,7 +202,6 @@ class _DetailpelamarState extends State<Detailpelamar> {
                               ],
                             )
                           : const SizedBox(),
-                      // Tidak menampilkan apapun jika sudah diterima/ditolak
                     ],
                   ),
                 )

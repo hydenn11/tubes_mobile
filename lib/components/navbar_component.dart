@@ -118,6 +118,7 @@ class _NavbarComponentState extends State<navbarComponent> {
   }
 
   Widget _buildPage(int index) {
+    if (index == 0) return home_pelamar();
     return _pages[index];
   }
 }

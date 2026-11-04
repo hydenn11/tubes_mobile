@@ -24,47 +24,37 @@ import 'package:rekanpabrik/pages/pelamar/upload_cv.dart';
 import 'package:rekanpabrik/pages/pengaduan/pengaduan.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-// COMPONENTS
-import 'package:rekanpabrik/components/carousel.dart';
 import 'package:rekanpabrik/components/confirm_pass_input.dart';
 import 'package:rekanpabrik/components/email_input.dart';
 import 'package:rekanpabrik/components/name_input.dart';
 import 'package:rekanpabrik/components/pass_input.dart';
 import 'package:rekanpabrik/components/search_bar_cari_pabrik.dart';
-import 'package:rekanpabrik/components/search_bar_saved_jobs.dart';
 
-// THEMES
 import 'package:rekanpabrik/shared/shared.dart';
 
-// UTILS
 import 'package:rekanpabrik/dummy/dummy_perusahaan.dart';
 import 'package:rekanpabrik/dummy/dummy_postingan_pekerjaan.dart';
 import 'package:rekanpabrik/utils/formatted_date.dart';
 
 import '../components/hrd_navbar_component.dart';
 
-// PAGES
 part 'welcome_page.dart';
 
-// UTILS
 part 'auth/register_pelamar.dart';
 part 'auth/login_page.dart';
 part 'auth/register_hrd.dart';
 
-// PELAMAR
 part 'pelamar/home_pelamar.dart';
 part 'pelamar/cari_pabrik.dart';
 part 'pelamar/saved_jobs.dart';
 part 'pelamar/cari_pekerjaan.dart';
 part 'pelamar/lamar_pekerjaan.dart';
 part 'pelamar/riwayat_lamaran.dart';
-part 'pelamar/detail_saved_jobs.dart';
 part 'pelamar/detail_history_lamaran.dart';
 part 'pelamar/profile_page.dart';
 part 'pelamar/detail_perusahaan.dart';
 part 'pelamar/detail_pekerjaan.dart';
 
-//HRD
 part 'hrd/homepage_hrd.dart';
 part 'hrd/post_history.dart';
 part 'hrd/profile_hrd.dart';

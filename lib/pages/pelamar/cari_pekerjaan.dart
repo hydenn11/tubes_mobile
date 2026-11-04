@@ -115,7 +115,6 @@ class _CaripekerjaanState extends State<Caripekerjaan> {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
           children: [
-            // 0. TOP BAR BACK BUTTON (MUNCUL KETIKA DIBUKA DARI BERANDA)
             if (showBack) ...[
               Row(
                 children: [
@@ -145,7 +144,6 @@ class _CaripekerjaanState extends State<Caripekerjaan> {
               const SizedBox(height: 16),
             ],
 
-            // 1. SEARCH BAR KONSISTEN (BRAND DARK MAROON & NEUTRAL SLATE BORDER)
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -214,7 +212,6 @@ class _CaripekerjaanState extends State<Caripekerjaan> {
 
             const SizedBox(height: 16),
 
-            // 2. TOMBOL PIL: LAMARAN YANG ANDA SIMPAN (BENTUK KAPSUL SESUAI REFERENSI DENGAN WARNA CHARCOAL)
             Material(
               color: const Color(0xFF1E293B), // Charcoal Slate sesuai tema
               borderRadius: BorderRadius.circular(30), // Bentuk kapsul / pill
@@ -258,7 +255,6 @@ class _CaripekerjaanState extends State<Caripekerjaan> {
 
             const SizedBox(height: 24),
 
-            // 3. SECTION REKOMENDASI (HEADER KONSISTEN)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -286,7 +282,6 @@ class _CaripekerjaanState extends State<Caripekerjaan> {
 
             const SizedBox(height: 14),
 
-            // 4. DAFTAR KARTU REKOMENDASI (KONSISTEN DENGAN SISTEM KARTU BERANDA)
             if (filteredJobs.isEmpty)
               Container(
                 margin: const EdgeInsets.only(top: 30),
@@ -340,7 +335,6 @@ class _CaripekerjaanState extends State<Caripekerjaan> {
     );
   }
 
-  // BUILDER KARTU REKOMENDASI KONSISTEN DENGAN DESIGN SYSTEM BERANDA
   Widget _buildJobCard(Map<String, dynamic> job, bool isSaved) {
     final int idPerusahaan = job['id_perusahaan'] ?? 1;
     final companyMatch = dummyPerusahaan.firstWhere(
@@ -383,7 +377,6 @@ class _CaripekerjaanState extends State<Caripekerjaan> {
         borderRadius: BorderRadius.circular(16),
         child: Stack(
           children: [
-            // Ornamen Ombak Konsisten (Subtle Dark Maroon Alpha)
             Positioned(
               right: -10,
               bottom: -15,
@@ -398,17 +391,14 @@ class _CaripekerjaanState extends State<Caripekerjaan> {
               ),
             ),
 
-            // Konten Kartu
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Row 1: Logo Box, Posisi & Nama Perusahaan, Tombol Bookmark
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Kotak Logo (Konsisten dengan Header Beranda)
                       Container(
                         width: 72,
                         height: 52,
@@ -441,7 +431,6 @@ class _CaripekerjaanState extends State<Caripekerjaan> {
 
                       const SizedBox(width: 12),
 
-                      // Posisi & Perusahaan
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -473,7 +462,6 @@ class _CaripekerjaanState extends State<Caripekerjaan> {
                         ),
                       ),
 
-                      // Tombol Bookmark / Simpan (Amber jika tersimpan)
                       IconButton(
                         onPressed: () => _toggleSave(jobId),
                         padding: EdgeInsets.zero,
@@ -493,10 +481,8 @@ class _CaripekerjaanState extends State<Caripekerjaan> {
 
                   const SizedBox(height: 14),
 
-                  // Row 2: Tag Tipe (Soft Maroon) & Tag Gaji (Soft Emerald)
                   Row(
                     children: [
-                      // Tag Tipe (Soft Maroon Pill)
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 5),
@@ -517,7 +503,6 @@ class _CaripekerjaanState extends State<Caripekerjaan> {
 
                       const SizedBox(width: 8),
 
-                      // Tag Gaji (Soft Emerald Financial Badge)
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 4),
@@ -545,11 +530,9 @@ class _CaripekerjaanState extends State<Caripekerjaan> {
 
                   const SizedBox(height: 14),
 
-                  // Row 3: Lokasi & Tombol Lamar (Dark Maroon)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Lokasi
                       Expanded(
                         child: Row(
                           children: [
@@ -577,7 +560,6 @@ class _CaripekerjaanState extends State<Caripekerjaan> {
 
                       const SizedBox(width: 8),
 
-                      // Tombol Lamar (Dark Maroon Brand CTA)
                       ElevatedButton(
                         onPressed: () {
                           Navigator.push(
