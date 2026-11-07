@@ -57,9 +57,11 @@ class _loginPageState extends State<login_page> {
     }
 
     var response = await loginapi.login(email, pass);
+    if (!mounted) return;
 
     if (response['status'] == true) {
       var user = await meapi.getUserProfile();
+      if (!mounted) return;
       print("========== USER ==========");
       print("USER RESPONSE:");
       print(user);
@@ -259,7 +261,7 @@ class _loginPageState extends State<login_page> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => LupaPassword()),
+                      MaterialPageRoute(builder: (context) => const LupaPassword()),
                     );
                   },
                   child: Text(

@@ -30,10 +30,10 @@ class _HRDnavbarComponentState extends State<HRDnavbarComponent> {
 
     _pages = [
       Homepagehrd(onTabChange: _onItemTapped),
-      Cekpelamar(),
-      Postjob(),
-      Posthistory(),
-      Profilehrd(),
+      const Cekpelamar(),
+      const Postjob(),
+      const Posthistory(),
+      const Profilehrd(),
     ];
   }
 

@@ -20,10 +20,10 @@ class _NavbarComponentState extends State<navbarComponent> {
     super.initState();
 
     _pages = [
-      home_pelamar(),
+      const home_pelamar(),
       const Caripekerjaan(),
       const riwayatLamaran(),
-      ProfilePage(),
+      const ProfilePage(),
     ];
   }
 
@@ -118,7 +118,7 @@ class _NavbarComponentState extends State<navbarComponent> {
   }
 
   Widget _buildPage(int index) {
-    if (index == 0) return home_pelamar();
+    if (index == 0) return const home_pelamar();
     return _pages[index];
   }
 }

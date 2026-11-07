@@ -88,11 +88,11 @@ class _searchBarCariPabrik extends State<searchBarCariPabrik> {
             },
             decoration: InputDecoration(
               hintText: "Cari Disini...",
-              hintStyle: TextStyle(color: Colors.grey),
-              prefixIcon: Icon(Icons.search, color: Colors.black),
+              hintStyle: const TextStyle(color: Colors.grey),
+              prefixIcon: const Icon(Icons.search, color: Colors.black),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.0),
-                borderSide: BorderSide(color: Colors.grey),
+                borderSide: const BorderSide(color: Colors.grey),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.0),
@@ -100,10 +100,10 @@ class _searchBarCariPabrik extends State<searchBarCariPabrik> {
               ),
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           results.isEmpty
               ? Container(
-                  child: Column(
+                  child: const Column(
                     children: [
                       SizedBox(
                         height: 30,
@@ -127,7 +127,7 @@ class _searchBarCariPabrik extends State<searchBarCariPabrik> {
                     itemCount: results.length,
                     itemBuilder: (context, index) {
                       return Container(
-                        margin: EdgeInsets.symmetric(vertical: 5),
+                        margin: const EdgeInsets.symmetric(vertical: 5),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
                           borderRadius:

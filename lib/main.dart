@@ -47,12 +47,12 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const WellcomePage(),
-        '/login': (context) => login_page(),
-        '/registerPelamar': (context) => register_pelamar(),
-        '/pagePelamar': (context) => navbarComponent(),
-        '/cariPabrik': (context) => CariPabrik(),
-        '/pageHRD': (context) => HRDnavbarComponent(),
-        '/cekPelamar': (context) => Cekpelamar(),
+        '/login': (context) => const login_page(),
+        '/registerPelamar': (context) => const register_pelamar(),
+        '/pagePelamar': (context) => const navbarComponent(),
+        '/cariPabrik': (context) => const CariPabrik(),
+        '/pageHRD': (context) => const HRDnavbarComponent(),
+        '/cekPelamar': (context) => const Cekpelamar(),
       },
     );
   }

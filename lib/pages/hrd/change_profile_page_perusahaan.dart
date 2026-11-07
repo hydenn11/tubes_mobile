@@ -414,10 +414,10 @@ class _ChangeprofilepageperusahaanState
   Widget _defaultPlaceholder() {
     return Container(
       color: const Color(0xFFF1F5F9),
-      child: Icon(
+      child: const Icon(
         Icons.business_rounded,
         size: 70,
-        color: const Color(0xFF94A3B8),
+        color: Color(0xFF94A3B8),
       ),
     );
   }

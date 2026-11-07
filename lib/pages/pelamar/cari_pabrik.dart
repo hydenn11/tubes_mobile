@@ -14,14 +14,14 @@ class _CariPabrik extends State<CariPabrik> {
     return Scaffold(
       backgroundColor: primaryColor,
       appBar: AppBar(
-        title: Text(''),
+        title: const Text(''),
       ),
       body: SafeArea(
           bottom: true,
           child: ListView(
-            padding: EdgeInsets.symmetric(horizontal: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
             children: [
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               Container(
@@ -37,7 +37,7 @@ class _CariPabrik extends State<CariPabrik> {
                             color: thirdColor),
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 10,
                     ),
                     Align(
@@ -53,11 +53,11 @@ class _CariPabrik extends State<CariPabrik> {
                   ],
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 30,
               ),
-              searchBarCariPabrik(),
-              SizedBox(
+              const searchBarCariPabrik(),
+              const SizedBox(
                 height: 30,
               ),
             ],

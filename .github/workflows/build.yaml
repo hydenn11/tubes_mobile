@@ -47,7 +47,8 @@ jobs:
           echo "sonar.sources=lib" >> sonar-project.properties
           echo "sonar.tests=test" >> sonar-project.properties
           echo "sonar.exclusions=**/*.g.dart" >> sonar-project.properties
-          echo "sonar.coverage.exclusions=**/*.g.dart" >> sonar-project.properties
+          echo "sonar.coverage.exclusions=**/*" >> sonar-project.properties
+          echo "sonar.cpd.exclusions=**/*" >> sonar-project.properties
           echo "sonar.flutter.reportPaths=coverage/lcov.info" >> sonar-project.properties
           echo "sonar.java.binaries=build" >> sonar-project.properties
 

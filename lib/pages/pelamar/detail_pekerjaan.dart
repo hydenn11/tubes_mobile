@@ -153,6 +153,7 @@ class _detailPekerjaanState extends State<detailPekerjaan> {
         }
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Error mengubah status simpan.'),
