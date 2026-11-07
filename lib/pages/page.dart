@@ -14,14 +14,13 @@ import 'package:rekanpabrik/api/pelamar_api.dart';
 import 'package:rekanpabrik/api/perusahaan_api.dart';
 import 'package:rekanpabrik/api/posting_pekerjaan_api.dart';
 import 'package:rekanpabrik/api/saved_jobs_api.dart';
-import 'package:rekanpabrik/components/search_bar_pelamar_pekerjaan.dart';
 import 'package:rekanpabrik/pages/hrd/change_profile_page_perusahaan.dart';
 import 'package:rekanpabrik/pages/hrd/reset_pass_perusahaan.dart' hide Changeprofilepageperusahaan;
+import 'package:rekanpabrik/pages/hrd/detail_pelamar.dart';
 import 'package:rekanpabrik/pages/auth/lupa_password.dart';
 import 'package:rekanpabrik/pages/pelamar/change_profile_page_pelamar.dart';
 import 'package:rekanpabrik/pages/pelamar/reset_pass_pelamar.dart';
 import 'package:rekanpabrik/pages/pelamar/upload_cv.dart';
-import 'package:rekanpabrik/pages/pengaduan/pengaduan.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:rekanpabrik/components/confirm_pass_input.dart';
@@ -34,7 +33,6 @@ import 'package:rekanpabrik/shared/shared.dart';
 
 import 'package:rekanpabrik/dummy/dummy_perusahaan.dart';
 import 'package:rekanpabrik/dummy/dummy_postingan_pekerjaan.dart';
-import 'package:rekanpabrik/utils/formatted_date.dart';
 
 import '../components/hrd_navbar_component.dart';
 
@@ -59,5 +57,6 @@ part 'hrd/homepage_hrd.dart';
 part 'hrd/post_history.dart';
 part 'hrd/profile_hrd.dart';
 part 'hrd/cek_pelamar.dart';
+part 'hrd/pelamar_per_posisi.dart';
 part 'hrd/post_job.dart';
 part 'hrd/detail_pekerjaan_hrd.dart';

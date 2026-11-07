@@ -18,15 +18,15 @@ List<Map<String, dynamic>> dummyAccounts = [
     'role': 'pelamar',
   },
   {
-    'name': 'PT Sentosa Makmur',
-    'nama_perusahaan': 'PT Sentosa Makmur',
+    'name': 'PT Astra Otoparts Tbk',
+    'nama_perusahaan': 'PT Astra Otoparts Tbk',
     'username': 'arvin',
     'email': 'arvin@gmail.com',
     'password': 'password123',
     'role': 'HRD',
-    'alamat': 'Kawasan Industri MM2100 Blok C-4, Cikarang Barat, Bekasi',
+    'alamat': 'Kawasan Industri GIIC Cikarang, Jawa Barat',
     'about':
-        'PT Sentosa Makmur adalah perusahaan manufaktur komponen presisi dan perakitan mekanikal terkemuka di Indonesia.',
+        'Perusahaan manufaktur terkemuka di Indonesia yang memproduksi berbagai komponen suku cadang otomotif presisi tinggi.',
   },
   {
     'name': 'Rakean Permana',

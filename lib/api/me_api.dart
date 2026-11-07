@@ -8,14 +8,24 @@ class meAPI {
     await Future.delayed(const Duration(milliseconds: 150));
     final prefs = await SharedPreferences.getInstance();
     final role = prefs.getString('user_role') ?? 'pelamar';
-    final email = prefs.getString('user_email') ?? (role == 'perusahaan' ? 'daffa@gmail.com' : 'rafif@gmail.com');
-    final name = prefs.getString('user_name') ?? (role == 'perusahaan' ? 'PT Sentosa Makmur' : 'Rafif Purnomo');
+    String? storedName = prefs.getString('user_name');
+    String? storedCompany = prefs.getString('user_nama_perusahaan');
+    if (storedName == 'PT Sentosa Makmur' || storedCompany == 'PT Sentosa Makmur') {
+      storedName = 'PT Astra Otoparts Tbk';
+      storedCompany = 'PT Astra Otoparts Tbk';
+      await prefs.setString('user_name', storedName);
+      await prefs.setString('user_nama_perusahaan', storedCompany);
+      await prefs.setString('user_alamat', 'Kawasan Industri GIIC Cikarang, Jawa Barat');
+    }
+
+    final email = prefs.getString('user_email') ?? (role == 'perusahaan' ? 'hrd@astra-otoparts.com' : 'rafif@gmail.com');
+    final name = storedName ?? (role == 'perusahaan' ? 'PT Astra Otoparts Tbk' : 'Rafif Purnomo');
     final firstName = prefs.getString('user_first_name') ?? name.split(' ').first;
     final lastName = prefs.getString('user_last_name') ?? (name.split(' ').length > 1 ? name.split(' ').sublist(1).join(' ') : 'Purnomo');
     final username = prefs.getString('user_username') ?? firstName.toLowerCase();
-    final namaPerusahaan = prefs.getString('user_nama_perusahaan') ?? name;
-    final alamat = prefs.getString('user_alamat') ?? 'Kawasan Industri MM2100 Blok C-4, Cikarang Barat';
-    final about = prefs.getString('user_about') ?? '$namaPerusahaan adalah perusahaan manufaktur komponen presisi dan perakitan mekanikal terkemuka di Indonesia.';
+    final namaPerusahaan = storedCompany ?? (prefs.getString('user_nama_perusahaan') ?? name);
+    final alamat = prefs.getString('user_alamat') ?? 'Kawasan Industri GIIC Cikarang, Jawa Barat';
+    final about = prefs.getString('user_about') ?? 'Perusahaan manufaktur terkemuka di Indonesia yang memproduksi berbagai komponen suku cadang otomotif presisi tinggi.';
 
     final cvPath = prefs.getString('user_curriculum_vitae');
     final cvName = prefs.getString('user_cv') ??

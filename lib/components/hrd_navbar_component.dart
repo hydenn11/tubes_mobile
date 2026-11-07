@@ -29,7 +29,7 @@ class _HRDnavbarComponentState extends State<HRDnavbarComponent> {
     _selectedIndex = widget.initialIndex;
 
     _pages = [
-      Homepagehrd(),
+      Homepagehrd(onTabChange: _onItemTapped),
       Cekpelamar(),
       Postjob(),
       Posthistory(),
@@ -78,7 +78,7 @@ class _HRDnavbarComponentState extends State<HRDnavbarComponent> {
                       Icons.home_rounded,
                       0,
                     ),
-                    label: 'Home',
+                    label: 'Beranda',
                   ),
                   BottomNavigationBarItem(
                     icon: _buildIcon(
@@ -86,7 +86,7 @@ class _HRDnavbarComponentState extends State<HRDnavbarComponent> {
                       Icons.people_rounded,
                       1,
                     ),
-                    label: 'Applicant',
+                    label: 'Pelamar',
                   ),
                   BottomNavigationBarItem(
                     icon: _buildIcon(
@@ -94,7 +94,7 @@ class _HRDnavbarComponentState extends State<HRDnavbarComponent> {
                       Icons.work_rounded,
                       2,
                     ),
-                    label: 'Post a Job',
+                    label: 'Pasang Lowongan',
                   ),
                   BottomNavigationBarItem(
                     icon: _buildIcon(
@@ -102,7 +102,7 @@ class _HRDnavbarComponentState extends State<HRDnavbarComponent> {
                       Icons.history_rounded,
                       3,
                     ),
-                    label: 'History',
+                    label: 'Riwayat',
                   ),
                   BottomNavigationBarItem(
                     icon: _buildIcon(
@@ -110,7 +110,7 @@ class _HRDnavbarComponentState extends State<HRDnavbarComponent> {
                       Icons.person_rounded,
                       4,
                     ),
-                    label: 'Profile',
+                    label: 'Profil',
                   ),
                 ],
                 currentIndex: _selectedIndex,
@@ -161,6 +161,9 @@ class _HRDnavbarComponentState extends State<HRDnavbarComponent> {
   }
 
   Widget _buildPage(int index) {
+    if (index == 0) {
+      return Homepagehrd(onTabChange: _onItemTapped);
+    }
     return _pages[index];
   }
 }

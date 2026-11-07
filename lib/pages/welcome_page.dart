@@ -93,35 +93,6 @@ class _WellcomePageState extends State<WellcomePage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 14, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: darkMaroon.withValues(alpha: 0.08),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: const [
-                                    Icon(Icons.factory_rounded,
-                                        size: 16, color: darkMaroon),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      "Solusi Karir Industri & Pabrik",
-                                      style: TextStyle(
-                                        fontFamily: 'poppins',
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: darkMaroon,
-                                        letterSpacing: 0.2,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              const SizedBox(height: 26),
-
                               Image.asset(
                                 'assets/img/logoRekanPabrik.png',
                                 height: 215,

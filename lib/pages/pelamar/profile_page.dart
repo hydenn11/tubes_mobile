@@ -243,17 +243,6 @@ class _ProfilePageState extends State<ProfilePage> {
             color: blackColor,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.support_agent_rounded, color: darkMaroon),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const Pengaduan()),
-              );
-            },
-          ),
-        ],
       ),
       body: SafeArea(
         child: ListView(

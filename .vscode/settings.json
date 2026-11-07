@@ -57,5 +57,6 @@
   "C_Cpp_Runner.useLinkTimeOptimization": false,
   "C_Cpp_Runner.msvcSecureNoWarnings": false,
   "gradle.java.home": "C:\\Program Files\\Java\\jdk-17",
-  "java.import.gradle.java.home": "C:\\Program Files\\Java\\jdk-17"
+  "java.import.gradle.java.home": "C:\\Program Files\\Java\\jdk-17",
+  "cmake.sourceDirectory": "D:/Mobile Arvin/mobile-rekanpabrik/windows"
 }

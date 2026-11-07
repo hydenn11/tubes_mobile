@@ -1,7 +1,12 @@
 part of '../page.dart';
 
 class Homepagehrd extends StatefulWidget {
-  const Homepagehrd({super.key});
+  final void Function(int index)? onTabChange;
+
+  const Homepagehrd({
+    super.key,
+    this.onTabChange,
+  });
 
   @override
   State<Homepagehrd> createState() => _HomepagehrdState();
@@ -9,25 +14,39 @@ class Homepagehrd extends StatefulWidget {
 
 class _HomepagehrdState extends State<Homepagehrd> {
   dynamic user;
-
+  List<Map<String, dynamic>> postedJobs = [];
+  List<Map<String, dynamic>> applicants = [];
   bool isLoading = true;
   String? errorMessage;
 
   @override
   void initState() {
     super.initState();
-    initUser();
+    initData();
   }
 
-  Future<void> initUser() async {
+  Future<void> initData() async {
     try {
+      errorMessage = null;
       final response = await meAPI().getUserProfile();
 
       if (!mounted) return;
 
       if (response['status'] == true && response['data'] != null) {
+        user = response['data'];
+        final int companyId = user['id_perusahaan'] ?? 1;
+
+        final jobsFuture = Postingpekerjaanapi().getPostPekerjaan(companyId);
+        final appsFuture =
+            Postingpekerjaanapi().getPelamarByCompanyId(companyId);
+
+        final results = await Future.wait([jobsFuture, appsFuture]);
+
+        if (!mounted) return;
+
         setState(() {
-          user = response['data'];
+          postedJobs = List<Map<String, dynamic>>.from(results[0]);
+          applicants = List<Map<String, dynamic>>.from(results[1]);
           errorMessage = null;
         });
       } else {
@@ -37,10 +56,8 @@ class _HomepagehrdState extends State<Homepagehrd> {
         });
       }
     } catch (e) {
-      debugPrint('Error loading HRD profile: $e');
-
+      debugPrint('Error loading HRD home data: $e');
       if (!mounted) return;
-
       setState(() {
         errorMessage =
             'Tidak dapat terhubung ke server. Periksa jaringan Anda.';
@@ -52,6 +69,36 @@ class _HomepagehrdState extends State<Homepagehrd> {
         });
       }
     }
+  }
+
+  void _switchTab(int index) {
+    if (widget.onTabChange != null) {
+      widget.onTabChange!(index);
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => HRDnavbarComponent(initialIndex: index),
+        ),
+      );
+    }
+  }
+
+  ImageProvider _getAvatarImage(String? path) {
+    if (path == null || path.isEmpty) {
+      return const AssetImage('assets/img/defaultPict.png');
+    }
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return NetworkImage(path);
+    }
+    if (path.startsWith('assets/')) {
+      return AssetImage(path);
+    }
+    final file = File(path);
+    if (file.existsSync()) {
+      return FileImage(file);
+    }
+    return const AssetImage('assets/img/defaultPict.png');
   }
 
   @override
@@ -71,58 +118,668 @@ class _HomepagehrdState extends State<Homepagehrd> {
       return _buildErrorState();
     }
 
-    final String companyName =
-        (user?['nama_perusahaan'] ?? 'Perusahaan').toString();
+    final String companyName = (user?['nama_perusahaan'] ??
+            user?['namaPerusahaanAsli'] ??
+            user?['nama'] ??
+            'Perusahaan')
+        .toString();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       body: SafeArea(
         child: RefreshIndicator(
           color: darkMaroon,
-          onRefresh: initUser,
+          onRefresh: initData,
           child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 16,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             children: [
               _buildTopHeader(companyName),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
-              _buildWelcomeSection(),
+              _buildActionReminderCard(),
 
               const SizedBox(height: 24),
 
-              _buildFeatureCard(
-                imagePath: 'assets/img/Image1.png',
-                title: 'Mencari kandidat yang tepat?',
-                description:
-                    'Temukan kandidat potensial dan buka kesempatan kerja baru untuk perusahaan Anda.',
-                buttonText: 'Unggah Lowongan',
-                icon: Icons.post_add_rounded,
-                onPressed: () {
-                  _navigateToMenu(2);
-                },
-              ),
+              _buildRecruitmentStatusCard(),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 28),
 
-              _buildFeatureCard(
-                imagePath: 'assets/img/Image2.png',
-                title: 'Telusuri kandidat yang tepat',
-                description:
-                    'Periksa daftar pelamar dan temukan kandidat yang sesuai dengan kriteria perusahaan Anda.',
-                buttonText: 'Lihat Kandidat',
-                icon: Icons.people_alt_rounded,
-                onPressed: () {
-                  _navigateToMenu(1);
-                },
-              ),
+              _buildRecentCandidatesSection(),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 32),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopHeader(String companyName) {
+    final String? profilePicture = user?['profile_pict']?.toString();
+
+    return Row(
+      children: [
+        Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: darkMaroon.withOpacity(0.25),
+              width: 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipOval(
+            child: Image(
+              image: _getAvatarImage(profilePicture),
+              width: 52,
+              height: 52,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 14),
+
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                companyName,
+                style: TextStyle(
+                  fontFamily: 'poppins',
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  color: blackColor,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              const Row(
+                children: [
+                  Icon(
+                    Icons.business_rounded,
+                    size: 13,
+                    color: Color(0xFF64748B),
+                  ),
+                  SizedBox(width: 5),
+                  Text(
+                    'Perekrut / HRD',
+                    style: TextStyle(
+                      fontFamily: 'poppins',
+                      fontSize: 12,
+                      color: Color(0xFF64748B),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionReminderCard() {
+    final int pendingCount = applicants
+        .where((a) =>
+            (a['status_lamaran'] ?? 'diproses').toString().toLowerCase() ==
+            'diproses')
+        .length;
+
+    if (pendingCount == 0) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Semua Berkas Sudah Ditinjau",
+              style: TextStyle(
+                fontFamily: 'poppins',
+                fontSize: 13.5,
+                fontWeight: FontWeight.w700,
+                color: blackColor,
+              ),
+            ),
+            const SizedBox(height: 3),
+            const Text(
+              "Belum ada berkas baru yang perlu tindakan saat ini.",
+              style: TextStyle(
+                fontFamily: 'poppins',
+                fontSize: 11.5,
+                color: Color(0xFF64748B),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: darkMaroon.withOpacity(0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: darkMaroon.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _switchTab(1),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            "Perlu Tindakan",
+                            style: TextStyle(
+                              fontFamily: 'poppins',
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w700,
+                              color: blackColor,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2.5),
+                            decoration: BoxDecoration(
+                              color: darkMaroon,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              "$pendingCount Baru",
+                              style: const TextStyle(
+                                fontFamily: 'poppins',
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "$pendingCount berkas pelamar menunggu review Anda.",
+                        style: const TextStyle(
+                          fontFamily: 'poppins',
+                          fontSize: 11.5,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 14,
+                  color: darkMaroon,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecruitmentStatusCard() {
+    final activeJobs = postedJobs
+        .where((j) =>
+            (j['status'] ?? '').toString().toLowerCase() == 'tersedia')
+        .take(2)
+        .toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Lowongan Aktif",
+              style: TextStyle(
+                fontFamily: 'poppins',
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: blackColor,
+                letterSpacing: -0.3,
+              ),
+            ),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => _switchTab(3),
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                  child: Text(
+                    "Kelola Semua",
+                    style: TextStyle(
+                      fontFamily: 'poppins',
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: darkMaroon,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (activeJobs.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.work_off_outlined,
+                  color: greyColor,
+                  size: 34,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Belum ada lowongan aktif",
+                  style: TextStyle(
+                    fontFamily: 'poppins',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: blackColor,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "Buka lowongan baru untuk mulai menjaring kandidat pabrik.",
+                  style: TextStyle(
+                    fontFamily: 'poppins',
+                    fontSize: 12,
+                    color: greyColor,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 14),
+                ElevatedButton.icon(
+                  onPressed: () => _switchTab(2),
+                  icon: const Icon(Icons.add_rounded, size: 16),
+                  label: const Text(
+                    "Pasang Lowongan",
+                    style: TextStyle(
+                      fontFamily: 'poppins',
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: darkMaroon,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10),
+                    minimumSize: const Size(0, 44),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          ...activeJobs.map((job) => _buildJobStatusItem(job)),
+      ],
+    );
+  }
+
+  Widget _buildJobStatusItem(Map<String, dynamic> job) {
+    final int jobId = job['id_post_pekerjaan'] ?? 1;
+    final String posisi =
+        (job['posisi'] ?? 'Operator Produksi').toString();
+    final String lokasi = (job['lokasi'] ?? 'Cikarang').toString();
+    final String tipe = (job['tipe'] ?? 'Penuh Waktu').toString();
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => DetailPekerjaanHRD(jobId: jobId),
+              ),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        posisi,
+                        style: TextStyle(
+                          fontFamily: 'poppins',
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w700,
+                          color: blackColor,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        "$lokasi • $tipe",
+                        style: const TextStyle(
+                          fontFamily: 'poppins',
+                          fontSize: 11,
+                          color: Color(0xFF64748B),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 14,
+                  color: greyColor,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecentCandidatesSection() {
+    final recentApplicants = applicants.take(2).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Pelamar Terbaru",
+              style: TextStyle(
+                fontFamily: 'poppins',
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: blackColor,
+                letterSpacing: -0.3,
+              ),
+            ),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => _switchTab(1),
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  child: Text(
+                    "Lihat Semua",
+                    style: TextStyle(
+                      fontFamily: 'poppins',
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: darkMaroon,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        if (recentApplicants.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.group_outlined,
+                  size: 34,
+                  color: greyColor,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Belum ada pelamar baru",
+                  style: TextStyle(
+                    fontFamily: 'poppins',
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: blackColor,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  "Pelamar yang mengirim berkas akan muncul di sini.",
+                  style: TextStyle(
+                    fontFamily: 'poppins',
+                    fontSize: 11,
+                    color: greyColor,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          )
+        else
+          ...recentApplicants.map((app) => _buildCandidateItem(app)),
+      ],
+    );
+  }
+
+  Widget _buildCandidateItem(Map<String, dynamic> app) {
+    final int lamaranId = app['id_lamaran_pekerjaan'] ?? 1;
+    final String firstName = (app['first_name'] ?? '').toString();
+    final String lastName = (app['last_name'] ?? '').toString();
+    final String candidateName =
+        ('$firstName $lastName').trim().isNotEmpty
+            ? ('$firstName $lastName').trim()
+            : 'Kandidat Pelamar';
+    final String posisi =
+        (app['posisi_dilamar'] ?? app['posisi'] ?? 'Operator Produksi')
+            .toString();
+    final String status =
+        (app['status_lamaran'] ?? 'diproses').toString().toLowerCase();
+
+    Color statusBgColor = const Color(0xFFFFFBEB);
+    Color statusTextColor = const Color(0xFFB45309);
+    String statusLabel = 'Diproses';
+
+    if (status == 'diterima') {
+      statusBgColor = const Color(0xFFECFDF5);
+      statusTextColor = const Color(0xFF047857);
+      statusLabel = 'Diterima';
+    } else if (status == 'ditolak') {
+      statusBgColor = const Color(0xFFFEF2F2);
+      statusTextColor = const Color(0xFFB91C1C);
+      statusLabel = 'Ditolak';
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => Detailpelamar(
+                  id_lamaran_perusahaan: lamaranId,
+                ),
+              ),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: darkMaroon.withOpacity(0.08),
+                  ),
+                  child: Center(
+                    child: Text(
+                      candidateName.isNotEmpty
+                          ? candidateName[0].toUpperCase()
+                          : 'K',
+                      style: TextStyle(
+                        fontFamily: 'poppins',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: darkMaroon,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        candidateName,
+                        style: TextStyle(
+                          fontFamily: 'poppins',
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: blackColor,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        "Melamar: $posisi",
+                        style: TextStyle(
+                          fontFamily: 'poppins',
+                          fontSize: 11,
+                          color: greyColor,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: statusBgColor,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    statusLabel,
+                    style: TextStyle(
+                      fontFamily: 'poppins',
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: statusTextColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -179,8 +836,7 @@ class _HomepagehrdState extends State<Homepagehrd> {
                       isLoading = true;
                       errorMessage = null;
                     });
-
-                    initUser();
+                    initData();
                   },
                   icon: const Icon(
                     Icons.refresh_rounded,
@@ -212,413 +868,6 @@ class _HomepagehrdState extends State<Homepagehrd> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTopHeader(String companyName) {
-    final String? profilePicture = user?['profile_pict']?.toString();
-
-    final bool hasProfilePicture = profilePicture != null &&
-        profilePicture.isNotEmpty &&
-        !profilePicture.startsWith('assets/');
-
-    return Row(
-      children: [
-        Container(
-          width: 54,
-          height: 54,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: darkMaroon.withOpacity(0.25),
-              width: 2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: ClipOval(
-            child: hasProfilePicture
-                ? Image.network(
-                    profilePicture,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) {
-                      return _defaultAvatar();
-                    },
-                  )
-                : _defaultAvatar(),
-          ),
-        ),
-
-        const SizedBox(width: 14),
-
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                companyName,
-                style: TextStyle(
-                  fontFamily: 'poppins',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: blackColor,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 3),
-              const Row(
-                children: [
-                  Icon(
-                    Icons.business_rounded,
-                    size: 13,
-                    color: Color(0xFF64748B),
-                  ),
-                  SizedBox(width: 5),
-                  Text(
-                    'Recruitment / HRD',
-                    style: TextStyle(
-                      fontFamily: 'poppins',
-                      fontSize: 12,
-                      color: Color(0xFF64748B),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(width: 10),
-
-        _buildHeaderIconButton(
-          icon: Icons.notifications_rounded,
-          onTap: () {
-            _showNotificationDialog();
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _defaultAvatar() {
-    return Container(
-      color: darkMaroon.withOpacity(0.08),
-      child: Icon(
-        Icons.business_rounded,
-        size: 30,
-        color: darkMaroon,
-      ),
-    );
-  }
-
-  Widget _buildHeaderIconButton({
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: const Color(0xFFE2E8F0),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.03),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Icon(
-            icon,
-            color: blackColor,
-            size: 22,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWelcomeSection() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: darkMaroon,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: darkMaroon.withOpacity(0.18),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            right: -15,
-            top: -20,
-            child: Icon(
-              Icons.business_center_rounded,
-              size: 115,
-              color: Colors.white.withOpacity(0.08),
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Selamat Datang!',
-                style: TextStyle(
-                  fontFamily: 'poppins',
-                  fontSize: 21,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Kelola proses rekrutmen dan temukan talenta terbaik untuk perusahaan Anda.',
-                style: TextStyle(
-                  fontFamily: 'poppins',
-                  fontSize: 12,
-                  height: 1.6,
-                  color: Colors.white.withOpacity(0.85),
-                ),
-              ),
-              const SizedBox(height: 18),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 7,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.15),
-                  ),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.verified_user_rounded,
-                      color: Colors.white,
-                      size: 15,
-                    ),
-                    SizedBox(width: 7),
-                    Text(
-                      'HRD Dashboard',
-                      style: TextStyle(
-                        fontFamily: 'poppins',
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFeatureCard({
-    required String imagePath,
-    required String title,
-    required String description,
-    required String buttonText,
-    required IconData icon,
-    required VoidCallback onPressed,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFFE2E8F0),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(14),
-            child: Image.asset(
-              imagePath,
-              height: 190,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) {
-                return Container(
-                  height: 190,
-                  width: double.infinity,
-                  color: const Color(0xFFF1F5F9),
-                  child: Icon(
-                    Icons.image_not_supported_outlined,
-                    size: 40,
-                    color: greyColor,
-                  ),
-                );
-              },
-            ),
-          ),
-
-          const SizedBox(height: 18),
-
-          Text(
-            title,
-            style: TextStyle(
-              fontFamily: 'poppins',
-              fontSize: 19,
-              fontWeight: FontWeight.w800,
-              color: blackColor,
-              height: 1.3,
-            ),
-          ),
-
-          const SizedBox(height: 7),
-
-          Text(
-            description,
-            style: TextStyle(
-              fontFamily: 'poppins',
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: greyColor,
-              height: 1.6,
-            ),
-          ),
-
-          const SizedBox(height: 18),
-
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: onPressed,
-              icon: Icon(
-                icon,
-                size: 18,
-              ),
-              label: Text(
-                buttonText,
-                style: const TextStyle(
-                  fontFamily: 'poppins',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: darkMaroon,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 13,
-                  horizontal: 16,
-                ),
-                minimumSize: const Size(0, 46),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _navigateToMenu(int index) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => HRDnavbarComponent(
-          initialIndex: index,
-        ),
-      ),
-    );
-  }
-
-  void _showNotificationDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
-          title: Row(
-            children: [
-              Icon(
-                Icons.notifications_active_rounded,
-                color: darkMaroon,
-                size: 24,
-              ),
-              const SizedBox(width: 10),
-              Text(
-                'Notifikasi',
-                style: TextStyle(
-                  fontFamily: 'poppins',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: darkMaroon,
-                ),
-              ),
-            ],
-          ),
-          content: const Text(
-            'Belum ada notifikasi terbaru.',
-            style: TextStyle(
-              fontFamily: 'poppins',
-              fontSize: 13,
-              color: Color(0xFF475569),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                'Tutup',
-                style: TextStyle(
-                  fontFamily: 'poppins',
-                  color: darkMaroon,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }

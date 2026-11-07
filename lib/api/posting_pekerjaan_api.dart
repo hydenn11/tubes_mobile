@@ -25,6 +25,9 @@ class Postingpekerjaanapi {
         'id_perusahaan': idPerusahaan,
         'posisi': item['posisi'] ?? 'Operator Produksi',
         'lokasi': item['lokasi'] ?? 'Cikarang, Jawa Barat',
+        'tipe': item['tipe'] ?? 'Penuh Waktu',
+        'gaji': item['gaji'] ?? 'Rp 5.2 - 6.5 Juta',
+        'bidang': item['bidang'] ?? 'Manufaktur & Pabrik',
         'job_details': item['job_details'] ?? 'Menjalankan operasional produksi sesuai SOP.',
         'requirements': item['requirements'] ?? 'Pendidikan minimal SMA/SMK sederajat.',
         'status': item['status'] ?? 'tersedia',
@@ -55,14 +58,20 @@ class Postingpekerjaanapi {
     String posisi,
     String lokasi,
     String jobDetails,
-    String requirements,
-  ) async {
+    String requirements, {
+    String tipe = 'Penuh Waktu',
+    String gaji = 'Rp 5.2 - 6.5 Juta',
+    String bidang = 'Manufaktur & Pabrik',
+  }) async {
     await Future.delayed(const Duration(milliseconds: 200));
     dummyPostPekerjaan.insert(0, {
       'id_post_pekerjaan': dummyPostPekerjaan.length + 1,
       'id_perusahaan': idPerusahaan,
       'posisi': posisi,
       'lokasi': lokasi,
+      'tipe': tipe,
+      'gaji': gaji,
+      'bidang': bidang,
       'job_details': jobDetails,
       'requirements': requirements,
       'status': 'tersedia',
@@ -81,71 +90,158 @@ class Postingpekerjaanapi {
     return true;
   }
 
-  Future<List<Map<String, dynamic>>> getPelamarByCompanyId(
-      int idPerusahaan) async {
-    await Future.delayed(const Duration(milliseconds: 100));
-    return [
-      {
-        'id_lamaran_pekerjaan': 1,
-        'id_pelamar': 1,
-        'first_name': 'Rafif',
-        'last_name': 'Purnomo',
-        'email': 'rafif@gmail.com',
-        'profile_pict': 'assets/img/defaultPict.png',
-        'link_cv': 'assets/docs/cv_rafif.pdf',
-        'status_lamaran': 'diproses',
-        'posisi_dilamar': 'Software Engineer',
-        'posisi': 'Software Engineer',
-        'nama_perusahaan': 'PT Nusantara Sejahtera',
-        'createdAt': '2024-10-15T08:30:00.000',
-      },
-      {
-        'id_lamaran_pekerjaan': 2,
-        'id_pelamar': 2,
-        'first_name': 'Budi',
-        'last_name': 'Santoso',
-        'email': 'budi@gmail.com',
-        'profile_pict': 'assets/img/defaultPict.png',
-        'link_cv': 'assets/docs/cv_budi.pdf',
-        'status_lamaran': 'diterima',
-        'posisi_dilamar': 'Marketing Manager',
-        'posisi': 'Marketing Manager',
-        'nama_perusahaan': 'PT Nusantara Sejahtera',
-        'createdAt': '2024-10-16T09:15:00.000',
-      },
-      {
-        'id_lamaran_pekerjaan': 3,
-        'id_pelamar': 3,
-        'first_name': 'Siti',
-        'last_name': 'Aminah',
-        'email': 'siti@gmail.com',
-        'profile_pict': 'assets/img/defaultPict.png',
-        'link_cv': 'assets/docs/cv_siti.pdf',
-        'status_lamaran': 'ditolak',
-        'posisi_dilamar': 'Data Analyst',
-        'posisi': 'Data Analyst',
-        'nama_perusahaan': 'PT Nusantara Sejahtera',
-        'createdAt': '2024-10-17T11:00:00.000',
-      },
-    ];
+  Future<bool> hapusPekerjaan(int idPostPekerjaan) async {
+    await Future.delayed(const Duration(milliseconds: 150));
+    final index = dummyPostPekerjaan.indexWhere(
+        (element) => element['id_post_pekerjaan'] == idPostPekerjaan);
+    if (index != -1) {
+      dummyPostPekerjaan.removeAt(index);
+      return true;
+    }
+    return false;
   }
 
-  Future<Map<String, dynamic>> getDetailPelamar(int idLamaranPekerjaan) async {
-    await Future.delayed(const Duration(milliseconds: 100));
-    return {
-      'id_lamaran_pekerjaan': idLamaranPekerjaan,
+  static final List<Map<String, dynamic>> dummyPelamar = [
+    {
+      'id_lamaran_pekerjaan': 1,
       'id_pelamar': 1,
+      'id_post_pekerjaan': 1,
       'first_name': 'Rafif',
       'last_name': 'Purnomo',
       'email': 'rafif@gmail.com',
       'profile_pict': 'assets/img/defaultPict.png',
       'link_cv': 'assets/docs/cv_rafif.pdf',
       'status_lamaran': 'diproses',
-      'posisi_dilamar': 'Software Engineer',
-      'about_me': 'Lulusan Teknik Mesin dengan sertifikasi K3 dan pengalaman 2 tahun di manufaktur.',
+      'posisi_dilamar': 'Operator Produksi (Assembly)',
+      'posisi': 'Operator Produksi (Assembly)',
+      'nama_perusahaan': 'PT Astra Otoparts Tbk',
+      'createdAt': '2024-10-15T08:30:00.000',
+    },
+    {
+      'id_lamaran_pekerjaan': 2,
+      'id_pelamar': 2,
+      'id_post_pekerjaan': 1,
+      'first_name': 'Budi',
+      'last_name': 'Santoso',
+      'email': 'budi@gmail.com',
+      'profile_pict': 'assets/img/defaultPict.png',
+      'link_cv': 'assets/docs/cv_budi.pdf',
+      'status_lamaran': 'diterima',
+      'posisi_dilamar': 'Operator Produksi (Assembly)',
+      'posisi': 'Operator Produksi (Assembly)',
+      'nama_perusahaan': 'PT Astra Otoparts Tbk',
+      'createdAt': '2024-10-16T09:15:00.000',
+    },
+    {
+      'id_lamaran_pekerjaan': 3,
+      'id_pelamar': 3,
+      'id_post_pekerjaan': 2,
+      'first_name': 'Siti',
+      'last_name': 'Aminah',
+      'email': 'siti@gmail.com',
+      'profile_pict': 'assets/img/defaultPict.png',
+      'link_cv': 'assets/docs/cv_siti.pdf',
+      'status_lamaran': 'ditolak',
+      'posisi_dilamar': 'Teknisi Maintenance Mesin CNC',
+      'posisi': 'Teknisi Maintenance Mesin CNC',
+      'nama_perusahaan': 'PT Toyota Motor Manufacturing',
+      'createdAt': '2024-10-17T11:00:00.000',
+    },
+    {
+      'id_lamaran_pekerjaan': 4,
+      'id_pelamar': 4,
+      'id_post_pekerjaan': 1,
+      'first_name': 'Agus',
+      'last_name': 'Pratama',
+      'email': 'agus.pratama@gmail.com',
+      'profile_pict': 'assets/img/defaultPict.png',
+      'link_cv': 'assets/docs/cv_agus.pdf',
+      'status_lamaran': 'diproses',
+      'posisi_dilamar': 'Operator Produksi (Assembly)',
+      'posisi': 'Operator Produksi (Assembly)',
+      'nama_perusahaan': 'PT Astra Otoparts Tbk',
+      'createdAt': '2024-10-18T14:20:00.000',
+    },
+    {
+      'id_lamaran_pekerjaan': 5,
+      'id_pelamar': 5,
+      'id_post_pekerjaan': 3,
+      'first_name': 'Dewi',
+      'last_name': 'Lestari',
+      'email': 'dewi.lestari@gmail.com',
+      'profile_pict': 'assets/img/defaultPict.png',
+      'link_cv': 'assets/docs/cv_dewi.pdf',
+      'status_lamaran': 'diproses',
+      'posisi_dilamar': 'Quality Control (QC) Inspector',
+      'posisi': 'Quality Control (QC) Inspector',
+      'nama_perusahaan': 'PT Mayora Indah Tbk',
+      'createdAt': '2024-10-19T10:00:00.000',
+    },
+    {
+      'id_lamaran_pekerjaan': 6,
+      'id_pelamar': 6,
+      'id_post_pekerjaan': 2,
+      'first_name': 'Hendra',
+      'last_name': 'Kusuma',
+      'email': 'hendra.kusuma@gmail.com',
+      'profile_pict': 'assets/img/defaultPict.png',
+      'link_cv': 'assets/docs/cv_hendra.pdf',
+      'status_lamaran': 'diproses',
+      'posisi_dilamar': 'Teknisi Maintenance Mesin CNC',
+      'posisi': 'Teknisi Maintenance Mesin CNC',
+      'nama_perusahaan': 'PT Toyota Motor Manufacturing',
+      'createdAt': '2024-10-20T13:45:00.000',
+    },
+  ];
+
+  Future<List<Map<String, dynamic>>> getPelamarByCompanyId(
+      int idPerusahaan) async {
+    await Future.delayed(const Duration(milliseconds: 100));
+    final companyJobIds = dummyPostPekerjaan
+        .where((j) => (j['id_perusahaan'] ?? 1) == idPerusahaan)
+        .map((j) => j['id_post_pekerjaan'])
+        .toSet();
+
+    final filtered = dummyPelamar
+        .where((p) => companyJobIds.contains(p['id_post_pekerjaan']))
+        .toList();
+
+    return filtered;
+  }
+
+  Future<List<Map<String, dynamic>>> getPelamarByJob(
+      int idPostPekerjaan, String jobTitle) async {
+    await Future.delayed(const Duration(milliseconds: 100));
+    final matchById = dummyPelamar
+        .where((p) => p['id_post_pekerjaan'] == idPostPekerjaan)
+        .toList();
+    if (matchById.isNotEmpty) return matchById;
+
+    final jobTitleClean = jobTitle.trim().toLowerCase();
+    final matchByTitle = dummyPelamar.where((p) {
+      final pos = (p['posisi_dilamar'] ?? p['posisi'] ?? '')
+          .toString()
+          .trim()
+          .toLowerCase();
+      return pos == jobTitleClean || pos.contains(jobTitleClean) || jobTitleClean.contains(pos);
+    }).toList();
+    if (matchByTitle.isNotEmpty) return matchByTitle;
+
+    return [];
+  }
+
+  Future<Map<String, dynamic>> getDetailPelamar(int idLamaranPekerjaan) async {
+    await Future.delayed(const Duration(milliseconds: 100));
+    final match = dummyPelamar.firstWhere(
+      (p) => p['id_lamaran_pekerjaan'] == idLamaranPekerjaan,
+      orElse: () => dummyPelamar.first,
+    );
+    return {
+      ...match,
+      'about_me':
+          'Lulusan dengan pengalaman di manufaktur industri dan pemahaman SOP & K3 yang baik.',
       'nomor_telpon': '081234567890',
       'alamat': 'Jl. Industri No. 10, Cikarang',
-      'createdAt': '2024-10-15T08:30:00.000',
     };
   }
 

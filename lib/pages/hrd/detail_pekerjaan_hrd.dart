@@ -18,12 +18,7 @@ class _DetailPekerjaanHRDState extends State<DetailPekerjaanHRD> {
   Map<String, dynamic>? selectedJob;
   bool isLoading = true;
   bool isChangingStatus = false;
-
-  static const Color _backgroundColor = Color(0xFFF8FAFC);
-  static const Color _primaryColor = Color(0xFF7B1E2B);
-  static const Color _textColor = Color(0xFF1E293B);
-  static const Color _secondaryTextColor = Color(0xFF64748B);
-  static const Color _borderColor = Color(0xFFE2E8F0);
+  bool isDeleting = false;
 
   @override
   void initState() {
@@ -92,14 +87,18 @@ class _DetailPekerjaanHRDState extends State<DetailPekerjaanHRD> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              status == 'terbuka'
-                  ? 'Pekerjaan berhasil dibuka.'
-                  : 'Pekerjaan berhasil ditutup.',
+              status == 'terbuka' || status == 'tersedia'
+                  ? 'Lowongan berhasil dibuka kembali.'
+                  : 'Lowongan pekerjaan berhasil ditutup.',
+              style: const TextStyle(
+                fontFamily: 'poppins',
+                fontSize: 12.5,
+              ),
             ),
-            backgroundColor: const Color(0xFF15803D),
+            backgroundColor: const Color(0xFF047857),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
             ),
           ),
         );
@@ -125,14 +124,14 @@ class _DetailPekerjaanHRDState extends State<DetailPekerjaanHRD> {
       });
 
       _showSnackBar(
-        'Terjadi kesalahan saat mengubah status pekerjaan.',
+        'Terjadi gangguan saat mengubah status pekerjaan.',
         isError: true,
       );
     }
   }
 
   Future<void> _confirmChangeStatus(String status) async {
-    final isOpening = status == 'terbuka';
+    final isOpening = status == 'terbuka' || status == 'tersedia';
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -140,38 +139,38 @@ class _DetailPekerjaanHRDState extends State<DetailPekerjaanHRD> {
         return AlertDialog(
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
           ),
           title: Text(
-            isOpening ? 'Buka Pekerjaan?' : 'Tutup Pekerjaan?',
-            style: const TextStyle(
-              fontSize: 19,
+            isOpening ? 'Buka Kembali Lowongan?' : 'Tutup Lowongan?',
+            style: TextStyle(
+              fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: _textColor,
-              fontFamily: 'Poppins',
+              color: blackColor,
+              fontFamily: 'poppins',
             ),
           ),
           content: Text(
             isOpening
-                ? 'Apakah kamu yakin ingin membuka kembali lowongan pekerjaan ini?'
-                : 'Apakah kamu yakin ingin menutup lowongan pekerjaan ini?',
+                ? 'Kandidat pelamar akan dapat kembali melihat dan mengajukan berkas untuk posisi ini.'
+                : 'Penerimaan berkas pelamar baru akan dinonaktifkan untuk posisi pekerjaan ini.',
             style: const TextStyle(
               fontSize: 13,
-              height: 1.6,
-              color: _secondaryTextColor,
-              fontFamily: 'Poppins',
+              height: 1.5,
+              color: Color(0xFF475569),
+              fontFamily: 'poppins',
             ),
           ),
-          actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
               child: const Text(
                 'Batal',
                 style: TextStyle(
-                  color: _secondaryTextColor,
+                  color: Color(0xFF64748B),
                   fontWeight: FontWeight.w600,
-                  fontFamily: 'Poppins',
+                  fontFamily: 'poppins',
                 ),
               ),
             ),
@@ -179,19 +178,20 @@ class _DetailPekerjaanHRDState extends State<DetailPekerjaanHRD> {
               onPressed: () => Navigator.pop(dialogContext, true),
               style: ElevatedButton.styleFrom(
                 backgroundColor:
-                    isOpening ? const Color(0xFF15803D) : _primaryColor,
+                    isOpening ? const Color(0xFF047857) : darkMaroon,
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               ),
               child: Text(
                 isOpening ? 'Ya, Buka' : 'Ya, Tutup',
                 style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Poppins',
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'poppins',
                 ),
               ),
             ),
@@ -202,6 +202,128 @@ class _DetailPekerjaanHRDState extends State<DetailPekerjaanHRD> {
 
     if (confirmed == true && mounted) {
       await _changeJobStatus(status);
+    }
+  }
+
+  Future<void> _deleteJob() async {
+    if (selectedJob == null || isDeleting) return;
+
+    final idPostPekerjaan =
+        int.tryParse(selectedJob!['id_post_pekerjaan'].toString());
+
+    if (idPostPekerjaan == null) {
+      _showSnackBar('ID pekerjaan tidak valid.', isError: true);
+      return;
+    }
+
+    setState(() {
+      isDeleting = true;
+    });
+
+    try {
+      final result =
+          await postingpekerjaanapi.hapusPekerjaan(idPostPekerjaan);
+
+      if (!mounted) return;
+
+      if (result) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Lowongan pekerjaan berhasil dihapus.',
+              style: TextStyle(fontFamily: 'poppins', fontSize: 12.5),
+            ),
+            backgroundColor: const Color(0xFF047857),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+
+        Navigator.pop(context, true);
+      } else {
+        setState(() {
+          isDeleting = false;
+        });
+        _showSnackBar('Gagal menghapus lowongan pekerjaan.', isError: true);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        isDeleting = false;
+      });
+      _showSnackBar('Terjadi gangguan saat memproses penghapusan.', isError: true);
+    }
+  }
+
+  Future<void> _confirmDeleteJob() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            'Hapus Lowongan?',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: blackColor,
+              fontFamily: 'poppins',
+            ),
+          ),
+          content: const Text(
+            'Apakah Anda yakin ingin menghapus lowongan ini? Seluruh data lowongan akan terhapus dan tidak dapat dipulihkan.',
+            style: TextStyle(
+              fontSize: 13,
+              height: 1.5,
+              color: Color(0xFF475569),
+              fontFamily: 'poppins',
+            ),
+          ),
+          actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text(
+                'Batal',
+                style: TextStyle(
+                  color: Color(0xFF64748B),
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'poppins',
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFB91C1C),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              ),
+              child: const Text(
+                'Ya, Hapus',
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'poppins',
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true && mounted) {
+      await _deleteJob();
     }
   }
 
@@ -216,15 +338,15 @@ class _DetailPekerjaanHRDState extends State<DetailPekerjaanHRD> {
         content: Text(
           message,
           style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 12,
+            fontFamily: 'poppins',
+            fontSize: 12.5,
           ),
         ),
         backgroundColor:
-            isError ? const Color(0xFFDC2626) : const Color(0xFF15803D),
+            isError ? const Color(0xFFB91C1C) : const Color(0xFF047857),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
         ),
       ),
     );
@@ -232,489 +354,113 @@ class _DetailPekerjaanHRDState extends State<DetailPekerjaanHRD> {
 
   String _formatTanggal(dynamic createdAt) {
     if (createdAt == null || createdAt.toString().isEmpty) {
-      return 'Tanggal tidak tersedia';
+      return '-';
     }
 
     try {
       final date = DateTime.parse(createdAt.toString());
-
-      const months = [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'Mei',
-        'Jun',
-        'Jul',
-        'Agu',
-        'Sep',
-        'Okt',
-        'Nov',
-        'Des',
-      ];
-
-      return '${date.day.toString().padLeft(2, '0')} ${months[date.month - 1]} ${date.year}';
+      return DateFormat('dd MMMM yyyy', 'id_ID').format(date);
     } catch (e) {
-      return 'Tanggal tidak tersedia';
+      return '-';
     }
-  }
-
-  Widget _buildStatusBadge(String status) {
-    final isOpen = status == 'terbuka';
-    final color = isOpen ? const Color(0xFF15803D) : const Color(0xFFDC2626);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 8,
-      ),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.09),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(
-          color: color.withOpacity(0.18),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 7,
-            height: 7,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            isOpen ? 'Terbuka' : 'Ditutup',
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoCard({
-    required IconData icon,
-    required String title,
-    required String value,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _borderColor),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: _primaryColor.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              icon,
-              color: _primaryColor,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: _secondaryTextColor,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  value.isEmpty ? 'Tidak tersedia' : value,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: _textColor,
-                    height: 1.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDescriptionSection({
-    required String title,
-    required String content,
-    required IconData icon,
-  }) {
-    final value = content.trim().isEmpty
-        ? 'Belum ada informasi yang ditambahkan.'
-        : content;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _borderColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                icon,
-                color: _primaryColor,
-                size: 20,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: _textColor,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          const Divider(color: _borderColor, height: 1),
-          const SizedBox(height: 14),
-          Text(
-            value,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 13,
-              height: 1.8,
-              color: _secondaryTextColor,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionButton({
-    required String label,
-    required IconData icon,
-    required Color color,
-    required VoidCallback onPressed,
-  }) {
-    return SizedBox(
-      height: 52,
-      child: ElevatedButton.icon(
-        onPressed: isChangingStatus ? null : onPressed,
-        icon: Icon(icon, size: 18),
-        label: Text(
-          label,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: color.withOpacity(0.5),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLoadingView() {
-    return Scaffold(
-      backgroundColor: _backgroundColor,
-      appBar: AppBar(
-        title: const Text('Detail Pekerjaan'),
-        backgroundColor: Colors.white,
-        foregroundColor: _textColor,
-        elevation: 0,
-      ),
-      body: const Center(
-        child: CircularProgressIndicator(
-          color: _primaryColor,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyView() {
-    return Scaffold(
-      backgroundColor: _backgroundColor,
-      appBar: AppBar(
-        title: const Text('Detail Pekerjaan'),
-        backgroundColor: Colors.white,
-        foregroundColor: _textColor,
-        elevation: 0,
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(30),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.work_off_outlined,
-                size: 65,
-                color: Colors.grey.shade400,
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Pekerjaan tidak ditemukan',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: _textColor,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Detail pekerjaan ini tidak tersedia atau sudah dihapus.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 12,
-                  color: _secondaryTextColor,
-                  height: 1.5,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     if (isLoading) return _buildLoadingView();
-
     if (selectedJob == null) return _buildEmptyView();
 
     final job = selectedJob!;
     final status = (job['status'] ?? 'ditutup').toString();
-    final isOpen = status == 'terbuka';
+    final bool isOpen = status == 'terbuka' || status == 'tersedia';
 
-    final posisi = (job['posisi'] ?? 'Posisi tidak tersedia').toString();
-    final lokasi = (job['lokasi'] ?? 'Lokasi tidak tersedia').toString();
+    final posisi = (job['posisi'] ?? 'Posisi Pekerjaan').toString();
+    final lokasi = (job['lokasi'] ?? 'Cikarang, Jawa Barat').toString();
+    final tipe = (job['tipe'] ?? 'Penuh Waktu').toString();
+    final gaji = (job['gaji'] ?? 'Sesuai Kebijakan Perusahaan').toString();
+    final bidang = (job['bidang'] ?? 'Manufaktur & Pabrik').toString();
     final deskripsi = (job['job_details'] ?? '').toString();
     final persyaratan = (job['requirements'] ?? '').toString();
     final tanggal = _formatTanggal(job['createdAt']);
 
     return Scaffold(
-      backgroundColor: _backgroundColor,
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Detail Pekerjaan',
           style: TextStyle(
-            fontFamily: 'Poppins',
+            fontFamily: 'poppins',
             fontSize: 16,
             fontWeight: FontWeight.w700,
-            color: _textColor,
+            color: blackColor,
           ),
         ),
         backgroundColor: Colors.white,
-        foregroundColor: _textColor,
         elevation: 0,
-        centerTitle: false,
+        scrolledUnderElevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Color(0xFF0F172A),
+            size: 20,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
-            color: _borderColor,
+            color: const Color(0xFFE2E8F0),
             height: 1,
           ),
         ),
       ),
       body: Stack(
         children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 22, 20, 30),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(22),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: _borderColor),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: _primaryColor.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: const Icon(
-                              Icons.work_outline_rounded,
-                              color: _primaryColor,
-                              size: 25,
-                            ),
-                          ),
-                          const Spacer(),
-                          _buildStatusBadge(status),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        posisi,
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 23,
-                          fontWeight: FontWeight.w700,
-                          color: _textColor,
-                          height: 1.35,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.location_on_outlined,
-                            size: 17,
-                            color: _secondaryTextColor,
-                          ),
-                          const SizedBox(width: 7),
-                          Expanded(
-                            child: Text(
-                              lokasi,
-                              style: const TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 12,
-                                color: _secondaryTextColor,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.calendar_today_outlined,
-                            size: 15,
-                            color: _secondaryTextColor,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Diposting pada $tanggal',
-                            style: const TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 11,
-                              color: _secondaryTextColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 18),
-                _buildInfoCard(
-                  icon: Icons.location_city_outlined,
-                  title: 'Lokasi Pekerjaan',
-                  value: lokasi,
-                ),
-                const SizedBox(height: 12),
-                _buildInfoCard(
-                  icon: Icons.event_outlined,
-                  title: 'Tanggal Diposting',
-                  value: tanggal,
-                ),
-                const SizedBox(height: 24),
-                _buildDescriptionSection(
-                  title: 'Deskripsi Pekerjaan',
-                  content: deskripsi,
-                  icon: Icons.description_outlined,
-                ),
-                const SizedBox(height: 16),
-                _buildDescriptionSection(
-                  title: 'Persyaratan',
-                  content: persyaratan,
-                  icon: Icons.fact_check_outlined,
-                ),
-                const SizedBox(height: 28),
-                const Text(
-                  'Kelola Lowongan',
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: _textColor,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  isOpen
-                      ? 'Tutup lowongan jika proses penerimaan sudah selesai atau tidak lagi menerima pelamar.'
-                      : 'Buka kembali lowongan agar pelamar dapat melihat dan melamar pekerjaan ini.',
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 12,
-                    height: 1.6,
-                    color: _secondaryTextColor,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: _buildActionButton(
-                    label: isOpen ? 'Tutup Pekerjaan' : 'Buka Pekerjaan',
-                    icon: isOpen
-                        ? Icons.lock_outline_rounded
-                        : Icons.lock_open_rounded,
-                    color: isOpen ? _primaryColor : const Color(0xFF15803D),
-                    onPressed: () {
-                      _confirmChangeStatus(
-                        isOpen ? 'ditutup' : 'terbuka',
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
+          ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            children: [
+              _buildHeaderCard(
+                posisi: posisi,
+                bidang: bidang,
+                lokasi: lokasi,
+                tipe: tipe,
+                tanggal: tanggal,
+                isOpen: isOpen,
+              ),
+
+              const SizedBox(height: 20),
+
+              _buildSpecificationSection(
+                lokasi: lokasi,
+                tipe: tipe,
+                gaji: gaji,
+                bidang: bidang,
+                tanggal: tanggal,
+                isOpen: isOpen,
+              ),
+
+              const SizedBox(height: 20),
+
+              _buildTextSection(
+                title: 'Deskripsi & Tanggung Jawab',
+                content: deskripsi,
+              ),
+
+              const SizedBox(height: 20),
+
+              _buildTextSection(
+                title: 'Persyaratan & Kualifikasi',
+                content: persyaratan,
+              ),
+
+              const SizedBox(height: 28),
+
+              _buildManagementSection(isOpen: isOpen),
+
+              const SizedBox(height: 36),
+            ],
           ),
-          if (isChangingStatus)
+          if (isChangingStatus || isDeleting)
             Positioned.fill(
               child: Container(
                 color: Colors.black.withOpacity(0.35),
@@ -726,6 +472,427 @@ class _DetailPekerjaanHRDState extends State<DetailPekerjaanHRD> {
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHeaderCard({
+    required String posisi,
+    required String bidang,
+    required String lokasi,
+    required String tipe,
+    required String tanggal,
+    required bool isOpen,
+  }) {
+    final Color statusBg = isOpen ? const Color(0xFFECFDF5) : const Color(0xFFFEF2F2);
+    final Color statusColor = isOpen ? const Color(0xFF047857) : const Color(0xFFB91C1C);
+    final String statusText = isOpen ? 'Aktif' : 'Ditutup';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                decoration: BoxDecoration(
+                  color: statusBg,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: statusColor.withOpacity(0.2)),
+                ),
+                child: Text(
+                  statusText,
+                  style: TextStyle(
+                    fontFamily: 'poppins',
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: statusColor,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  tipe,
+                  style: TextStyle(
+                    fontFamily: 'poppins',
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: blackColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            posisi,
+            style: TextStyle(
+              fontFamily: 'poppins',
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: blackColor,
+              letterSpacing: -0.3,
+              height: 1.3,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '$lokasi • $bidang',
+            style: const TextStyle(
+              fontFamily: 'poppins',
+              fontSize: 12,
+              color: Color(0xFF64748B),
+            ),
+          ),
+          if (tanggal != '-') ...[
+            const SizedBox(height: 4),
+            Text(
+              'Diterbitkan pada $tanggal',
+              style: const TextStyle(
+                fontFamily: 'poppins',
+                fontSize: 11,
+                color: Color(0xFF94A3B8),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSpecificationSection({
+    required String lokasi,
+    required String tipe,
+    required String gaji,
+    required String bidang,
+    required String tanggal,
+    required bool isOpen,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Spesifikasi Lowongan',
+          style: TextStyle(
+            fontFamily: 'poppins',
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: blackColor,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSpecItem(
+                label: 'LOKASI PENEMPATAN',
+                value: lokasi,
+              ),
+              const Divider(height: 22, color: Color(0xFFF1F5F9)),
+              _buildSpecItem(
+                label: 'TIPE PEKERJAAN',
+                value: tipe,
+              ),
+              const Divider(height: 22, color: Color(0xFFF1F5F9)),
+              _buildSpecItem(
+                label: 'BIDANG INDUSTRI',
+                value: bidang,
+              ),
+              const Divider(height: 22, color: Color(0xFFF1F5F9)),
+              _buildSpecItem(
+                label: 'ESTIMASI GAJI',
+                value: gaji,
+              ),
+              const Divider(height: 22, color: Color(0xFFF1F5F9)),
+              _buildSpecItem(
+                label: 'STATUS PENERIMAAN',
+                value: isOpen ? 'Aktif (Menerima Pendaftaran)' : 'Ditutup (Penerimaan Berakhir)',
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSpecItem({
+    required String label,
+    required String value,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontFamily: 'poppins',
+            fontSize: 10.5,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+            color: Color(0xFF64748B),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value.isEmpty ? '-' : value,
+          style: TextStyle(
+            fontFamily: 'poppins',
+            fontSize: 13.5,
+            fontWeight: FontWeight.w600,
+            color: blackColor,
+            height: 1.25,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextSection({
+    required String title,
+    required String content,
+  }) {
+    final String text = content.trim().isEmpty ? 'Tidak ada rincian yang ditambahkan.' : content.trim();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontFamily: 'poppins',
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: blackColor,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontFamily: 'poppins',
+              fontSize: 13,
+              height: 1.6,
+              color: Color(0xFF334155),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildManagementSection({required bool isOpen}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Kelola Status Lowongan',
+          style: TextStyle(
+            fontFamily: 'poppins',
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: blackColor,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          isOpen
+              ? 'Tutup lowongan ini bila kuota pelamar telah terpenuhi, atau hapus jika dibatalkan.'
+              : 'Buka kembali lowongan agar kandidat dapat melamar, atau hapus jika tidak lagi digunakan.',
+          style: const TextStyle(
+            fontFamily: 'poppins',
+            fontSize: 12,
+            color: Color(0xFF64748B),
+            height: 1.5,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              flex: 1,
+              child: SizedBox(
+                height: 48,
+                child: OutlinedButton(
+                  onPressed: isDeleting || isChangingStatus ? null : _confirmDeleteJob,
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      color: const Color(0xFFB91C1C).withOpacity(0.35),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Hapus',
+                    style: TextStyle(
+                      fontFamily: 'poppins',
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFFB91C1C),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              flex: 2,
+              child: SizedBox(
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: isChangingStatus || isDeleting
+                      ? null
+                      : () {
+                          _confirmChangeStatus(isOpen ? 'ditutup' : 'terbuka');
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isOpen ? darkMaroon : const Color(0xFF047857),
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: (isOpen ? darkMaroon : const Color(0xFF047857))
+                        .withOpacity(0.5),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    isOpen ? 'Tutup Lowongan' : 'Buka Lowongan',
+                    style: const TextStyle(
+                      fontFamily: 'poppins',
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoadingView() {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        title: Text(
+          'Detail Pekerjaan',
+          style: TextStyle(
+            fontFamily: 'poppins',
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: blackColor,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Color(0xFF0F172A),
+            size: 20,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: Center(
+        child: CircularProgressIndicator(color: darkMaroon),
+      ),
+    );
+  }
+
+  Widget _buildEmptyView() {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        title: Text(
+          'Detail Pekerjaan',
+          style: TextStyle(
+            fontFamily: 'poppins',
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: blackColor,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Color(0xFF0F172A),
+            size: 20,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(30),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Lowongan Tidak Ditemukan',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'poppins',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: blackColor,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Detail lowongan pekerjaan ini sudah dihapus atau tidak tersedia.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'poppins',
+                  fontSize: 12,
+                  color: Color(0xFF64748B),
+                  height: 1.5,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

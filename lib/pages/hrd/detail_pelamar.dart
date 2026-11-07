@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:rekanpabrik/api/melamar_pekerjaan_api.dart';
 import 'package:rekanpabrik/api/posting_pekerjaan_api.dart';
 import 'package:rekanpabrik/shared/shared.dart';
@@ -21,15 +24,9 @@ class _DetailpelamarState extends State<Detailpelamar> {
 
   bool isLoading = true;
   bool isUpdatingStatus = false;
+  String? errorMessage;
 
   final String defaultFotoIMG = 'assets/img/defaultPict.png';
-
-  static const Color darkMaroon = Color(0xFF5B1720);
-  static const Color maroon = Color(0xFF7A2633);
-  static const Color backgroundColor = Color(0xFFF8FAFC);
-  static const Color textColor = Color(0xFF1E293B);
-  static const Color secondaryColor = Color(0xFF64748B);
-  static const Color borderColor = Color(0xFFE2E8F0);
 
   @override
   void initState() {
@@ -42,161 +39,78 @@ class _DetailpelamarState extends State<Detailpelamar> {
 
     setState(() {
       isLoading = true;
+      errorMessage = null;
     });
 
     try {
-      final data = await Postingpekerjaanapi()
-          .getDetailPelamar(idLamaranPekerjaan);
+      final data =
+          await Postingpekerjaanapi().getDetailPelamar(idLamaranPekerjaan);
 
       if (!mounted) return;
 
       setState(() {
         pelamar = data;
         isLoading = false;
+        errorMessage = null;
       });
-
-      debugPrint('DETAIL PELAMAR: $data');
     } catch (e) {
+      debugPrint('Fetch detail pelamar error: $e');
       if (!mounted) return;
 
       setState(() {
         isLoading = false;
+        errorMessage = 'Gagal memuat profil kandidat. Periksa koneksi Anda.';
       });
-
-      _showSnackBar(
-        'Terjadi kesalahan saat mengambil data pelamar.',
-        isError: true,
-      );
-
-      debugPrint('Fetch detail pelamar error: $e');
     }
   }
 
-  ImageProvider _getProfileImage() {
-    final String? imagePath =
-        pelamar?['profile_pict']?.toString();
-
-    if (imagePath == null || imagePath.isEmpty) {
+  ImageProvider _getProfileImage(String? path) {
+    if (path == null || path.isEmpty) {
       return AssetImage(defaultFotoIMG);
     }
-
-    if (imagePath.startsWith('http://') ||
-        imagePath.startsWith('https://')) {
-      return NetworkImage(imagePath);
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return NetworkImage(path);
     }
-
-    if (imagePath.startsWith('assets/')) {
-      return AssetImage(imagePath);
+    if (path.startsWith('assets/')) {
+      return AssetImage(path);
     }
-
+    final file = File(path);
+    if (file.existsSync()) {
+      return FileImage(file);
+    }
     return AssetImage(defaultFotoIMG);
   }
 
-  Widget _buildProfileImage() {
-    return Container(
-      width: 124,
-      height: 124,
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: const Color(0xFFF0DDE0),
-          width: 2,
-        ),
-      ),
-      child: ClipOval(
-        child: Image(
-          image: _getProfileImage(),
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return Image.asset(
-              defaultFotoIMG,
-              fit: BoxFit.cover,
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Color statusColors(String? status) {
-    switch (status?.toLowerCase()) {
-      case 'diproses':
-        return const Color(0xFF64748B);
-
-      case 'ditolak':
-        return const Color(0xFFDC2626);
-
-      case 'diterima':
-        return const Color(0xFF16A34A);
-
-      default:
-        return const Color(0xFF2563EB);
+  String _formatDate(dynamic dateStr) {
+    if (dateStr == null || dateStr.toString().isEmpty) return '-';
+    try {
+      final parsed = DateTime.parse(dateStr.toString());
+      return DateFormat('d MMMM yyyy', 'id_ID').format(parsed);
+    } catch (_) {
+      return dateStr.toString();
     }
   }
 
-  IconData _getStatusIcon(String? status) {
-    switch (status?.toLowerCase()) {
-      case 'diproses':
-        return Icons.hourglass_top_rounded;
+  Future<void> _launchExternalUrl(String urlString, String fallbackError) async {
+    if (urlString.trim().isEmpty) {
+      _showSnackBar(fallbackError, isError: true);
+      return;
+    }
 
-      case 'ditolak':
-        return Icons.cancel_rounded;
-
-      case 'diterima':
-        return Icons.check_circle_rounded;
-
-      default:
-        return Icons.info_outline_rounded;
+    try {
+      final Uri uri = Uri.parse(urlString.trim());
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        _showSnackBar(fallbackError, isError: true);
+      }
+    } catch (e) {
+      debugPrint('Error launching url $urlString: $e');
+      _showSnackBar(fallbackError, isError: true);
     }
   }
 
-  Widget _buildStatusBadge() {
-    final String status =
-        pelamar?['status']?.toString() ?? 'Belum Diproses';
-
-    final Color color = statusColors(status);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 9,
-      ),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(
-          color: color.withOpacity(0.25),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            _getStatusIcon(status),
-            size: 16,
-            color: color,
-          ),
-          const SizedBox(width: 7),
-          Text(
-            status.toUpperCase(),
-            style: TextStyle(
-              fontFamily: 'poppins',
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              color: color,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<bool> updateStatus(
-    String status,
-    int idLamaranPekerjaan,
-  ) async {
+  Future<bool> _updateStatus(String status, int idLamaranPekerjaan) async {
     if (isUpdatingStatus) return false;
 
     setState(() {
@@ -210,31 +124,26 @@ class _DetailpelamarState extends State<Detailpelamar> {
       if (!mounted) return false;
 
       if (result) {
+        setState(() {
+          pelamar['status_lamaran'] = status;
+          pelamar['status'] = status;
+        });
+
         _showSnackBar(
           status == 'diterima'
-              ? 'Pelamar berhasil diterima.'
-              : 'Pelamar berhasil ditolak.',
+              ? 'Kandidat pelamar berhasil diterima.'
+              : 'Kandidat pelamar telah ditolak.',
         );
 
         return true;
       } else {
-        _showSnackBar(
-          'Gagal memperbarui status lamaran.',
-          isError: true,
-        );
-
+        _showSnackBar('Gagal memperbarui status lamaran.', isError: true);
         return false;
       }
     } catch (e) {
-      if (!mounted) return false;
-
       debugPrint('Update status error: $e');
-
-      _showSnackBar(
-        'Terjadi kesalahan saat memperbarui status.',
-        isError: true,
-      );
-
+      if (!mounted) return false;
+      _showSnackBar('Terjadi kesalahan saat memproses keputusan.', isError: true);
       return false;
     } finally {
       if (mounted) {
@@ -254,72 +163,75 @@ class _DetailpelamarState extends State<Detailpelamar> {
       builder: (context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(18),
           ),
           title: Row(
             children: [
               Icon(
                 isAccepted
                     ? Icons.check_circle_outline_rounded
-                    : Icons.warning_amber_rounded,
+                    : Icons.cancel_outlined,
                 color: isAccepted
-                    ? Colors.green
-                    : Colors.red,
-                size: 25,
+                    ? const Color(0xFF047857)
+                    : const Color(0xFFB91C1C),
+                size: 24,
               ),
               const SizedBox(width: 10),
-              const Text(
-                'Konfirmasi',
+              Text(
+                isAccepted ? 'Terima Pelamar' : 'Tolak Pelamar',
                 style: TextStyle(
                   fontFamily: 'poppins',
                   fontWeight: FontWeight.w700,
-                  fontSize: 17,
+                  fontSize: 16,
+                  color: blackColor,
                 ),
               ),
             ],
           ),
           content: Text(
             isAccepted
-                ? 'Apakah Anda yakin ingin menerima pelamar ini?'
-                : 'Apakah Anda yakin ingin menolak pelamar ini?',
+                ? 'Apakah Anda yakin ingin menerima kandidat ini untuk posisi yang dilamar?'
+                : 'Apakah Anda yakin ingin menolak berkas lamaran dari kandidat ini?',
             style: const TextStyle(
               fontFamily: 'poppins',
               fontSize: 13,
-              color: secondaryColor,
-              height: 1.6,
+              color: Color(0xFF475569),
+              height: 1.5,
             ),
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
+              onPressed: () => Navigator.of(context).pop(false),
               child: const Text(
                 'Batal',
                 style: TextStyle(
                   fontFamily: 'poppins',
-                  color: secondaryColor,
+                  color: Color(0xFF64748B),
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    isAccepted ? Colors.green : Colors.red,
+                backgroundColor: isAccepted
+                    ? const Color(0xFF047857)
+                    : const Color(0xFFB91C1C),
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 9,
+                ),
               ),
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
+              onPressed: () => Navigator.of(context).pop(true),
               child: Text(
-                isAccepted ? 'Terima' : 'Tolak',
+                isAccepted ? 'Ya, Terima' : 'Ya, Tolak',
                 style: const TextStyle(
                   fontFamily: 'poppins',
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
@@ -335,67 +247,18 @@ class _DetailpelamarState extends State<Detailpelamar> {
     );
 
     if (idLamaran == null) {
-      _showSnackBar(
-        'ID lamaran tidak valid.',
-        isError: true,
-      );
+      _showSnackBar('ID lamaran tidak valid.', isError: true);
       return;
     }
 
-    final bool success = await updateStatus(status, idLamaran);
+    final bool success = await _updateStatus(status, idLamaran);
 
     if (success && mounted) {
       Navigator.pop(context, true);
     }
   }
 
-  Future<void> _launchCV(String? cvUrl) async {
-    if (cvUrl == null || cvUrl.trim().isEmpty) {
-      _showSnackBar(
-        'CV pelamar tidak tersedia.',
-        isError: true,
-      );
-      return;
-    }
-
-    try {
-      final Uri uri = Uri.parse(cvUrl.trim());
-
-      if (!uri.hasScheme ||
-          (uri.scheme != 'http' && uri.scheme != 'https') ||
-          uri.host.isEmpty) {
-        _showSnackBar(
-          'Alamat CV tidak valid.',
-          isError: true,
-        );
-        return;
-      }
-
-      final bool launched = await launchUrl(
-        uri,
-        mode: LaunchMode.externalApplication,
-      );
-
-      if (!launched && mounted) {
-        _showSnackBar(
-          'Tidak dapat membuka CV.',
-          isError: true,
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-
-      _showSnackBar(
-        'Terjadi kesalahan saat membuka CV.',
-        isError: true,
-      );
-    }
-  }
-
-  void _showSnackBar(
-    String message, {
-    bool isError = false,
-  }) {
+  void _showSnackBar(String message, {bool isError = false}) {
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -407,9 +270,7 @@ class _DetailpelamarState extends State<Detailpelamar> {
             fontSize: 12,
           ),
         ),
-        backgroundColor: isError
-            ? Colors.red.shade700
-            : darkMaroon,
+        backgroundColor: isError ? const Color(0xFFB91C1C) : darkMaroon,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -418,58 +279,232 @@ class _DetailpelamarState extends State<Detailpelamar> {
     );
   }
 
-  Widget _buildInformationField({
-    required String label,
-    required String value,
-    required IconData icon,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: borderColor,
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Color(0xFF0F172A),
+            size: 20,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Detail Pelamar',
+          style: TextStyle(
+            fontFamily: 'poppins',
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: blackColor,
+          ),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            color: const Color(0xFFE2E8F0),
+            height: 1,
+          ),
         ),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: isLoading
+          ? Center(
+              child: CircularProgressIndicator(color: darkMaroon),
+            )
+          : errorMessage != null
+              ? _buildErrorState()
+              : _buildContent(),
+    );
+  }
+
+  Widget _buildContent() {
+    final String firstName = (pelamar?['first_name'] ?? '').toString();
+    final String lastName = (pelamar?['last_name'] ?? '').toString();
+    final String fullName = ('$firstName $lastName').trim().isNotEmpty
+        ? ('$firstName $lastName').trim()
+        : 'Kandidat Pelamar';
+    final String posisi = (pelamar?['posisi_dilamar'] ??
+            pelamar?['posisi'] ??
+            'Operator Produksi')
+        .toString();
+    final String status = (pelamar?['status_lamaran'] ??
+            pelamar?['status'] ??
+            'diproses')
+        .toString()
+        .toLowerCase();
+    final String email = (pelamar?['email'] ?? '').toString();
+    final String phone =
+        (pelamar?['nomor_telpon'] ?? pelamar?['no_hp'] ?? '081234567890')
+            .toString();
+    final String alamat =
+        (pelamar?['alamat'] ?? 'Cikarang, Jawa Barat').toString();
+    final String aboutMe = (pelamar?['about_me'] ??
+            'Lulusan SMK/D3 dengan pengalaman kerja di industri manufaktur dan pemahaman SOP & K3 yang baik.')
+        .toString();
+    final String linkCv =
+        (pelamar?['link_cv'] ?? pelamar?['curriculum_vitae'] ?? '').toString();
+    final String dateApplied = _formatDate(pelamar?['createdAt']);
+
+    return SafeArea(
+      child: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        children: [
+          _buildCandidateHeaderCard(
+            fullName: fullName,
+            posisi: posisi,
+            status: status,
+            dateApplied: dateApplied,
+          ),
+
+          const SizedBox(height: 24),
+
+          _buildProfileDetailsSection(
+            posisi: posisi,
+            email: email,
+            phone: phone,
+            alamat: alamat,
+            aboutMe: aboutMe,
+          ),
+
+          const SizedBox(height: 24),
+
+          _buildCvDocumentCard(linkCv: linkCv),
+
+          const SizedBox(height: 28),
+
+          _buildDecisionSection(status: status),
+
+          const SizedBox(height: 36),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCandidateHeaderCard({
+    required String fullName,
+    required String posisi,
+    required String status,
+    required String dateApplied,
+  }) {
+    Color statusBgColor = const Color(0xFFFFFBEB);
+    Color statusTextColor = const Color(0xFFB45309);
+    IconData statusIcon = Icons.access_time_rounded;
+    String statusLabel = 'Diproses';
+
+    if (status == 'diterima') {
+      statusBgColor = const Color(0xFFECFDF5);
+      statusTextColor = const Color(0xFF047857);
+      statusIcon = Icons.check_circle_outline_rounded;
+      statusLabel = 'Diterima';
+    } else if (status == 'ditolak') {
+      statusBgColor = const Color(0xFFFEF2F2);
+      statusTextColor = const Color(0xFFB91C1C);
+      statusIcon = Icons.cancel_outlined;
+      statusLabel = 'Ditolak';
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
         children: [
           Container(
-            width: 38,
-            height: 38,
+            width: 80,
+            height: 80,
             decoration: BoxDecoration(
-              color: const Color(0xFFF5E8EA),
-              borderRadius: BorderRadius.circular(11),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: darkMaroon.withOpacity(0.2),
+                width: 2,
+              ),
             ),
-            child: Icon(
-              icon,
-              size: 19,
-              color: darkMaroon,
+            child: ClipOval(
+              child: Image(
+                image: _getProfileImage(pelamar?['profile_pict']?.toString()),
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Image.asset(
+                  defaultFotoIMG,
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
           ),
-          const SizedBox(width: 13),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(height: 14),
+          Text(
+            fullName,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'poppins',
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              color: blackColor,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            posisi,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'poppins',
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: greyColor,
+            ),
+          ),
+          if (dateApplied.isNotEmpty && dateApplied != '-') ...[
+            const SizedBox(height: 4),
+            Text(
+              'Melamar pada $dateApplied',
+              style: const TextStyle(
+                fontFamily: 'poppins',
+                fontSize: 11,
+                color: Color(0xFF94A3B8),
+              ),
+            ),
+          ],
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+            decoration: BoxDecoration(
+              color: statusBgColor,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: statusTextColor.withOpacity(0.2),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontFamily: 'poppins',
-                    fontSize: 10,
-                    color: secondaryColor,
-                    fontWeight: FontWeight.w500,
-                  ),
+                Icon(
+                  statusIcon,
+                  size: 13,
+                  color: statusTextColor,
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(width: 5),
                 Text(
-                  value.isEmpty ? '-' : value,
-                  style: const TextStyle(
+                  statusLabel,
+                  style: TextStyle(
                     fontFamily: 'poppins',
-                    fontSize: 13,
-                    color: textColor,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: statusTextColor,
                   ),
                 ),
               ],
@@ -480,379 +515,434 @@ class _DetailpelamarState extends State<Detailpelamar> {
     );
   }
 
-  Widget _buildActionButtons() {
-    final String status =
-        pelamar?['status']?.toString().toLowerCase() ?? '';
-
-    if (status == 'diterima' || status == 'ditolak') {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF1F5F9),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: const Row(
-          children: [
-            Icon(
-              Icons.info_outline_rounded,
-              color: secondaryColor,
-              size: 20,
-            ),
-            SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                'Status lamaran ini sudah ditetapkan dan tidak dapat diproses kembali melalui halaman ini.',
-                style: TextStyle(
-                  fontFamily: 'poppins',
-                  fontSize: 11,
-                  color: secondaryColor,
-                  height: 1.5,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
+  Widget _buildProfileDetailsSection({
+    required String posisi,
+    required String email,
+    required String phone,
+    required String alamat,
+    required String aboutMe,
+  }) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: double.infinity,
-          height: 50,
-          child: ElevatedButton(
-            onPressed: isUpdatingStatus
-                ? null
-                : () => _confirmUpdateStatus('diterima'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF16A34A),
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(13),
-              ),
-            ),
-            child: isUpdatingStatus
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
-                : const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.check_circle_outline_rounded,
-                        size: 19,
-                      ),
-                      SizedBox(width: 9),
-                      Text(
-                        'Terima Pelamar',
-                        style: TextStyle(
-                          fontFamily: 'poppins',
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
+        Text(
+          'Informasi Kandidat',
+          style: TextStyle(
+            fontFamily: 'poppins',
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: blackColor,
           ),
         ),
         const SizedBox(height: 12),
-        SizedBox(
+        Container(
           width: double.infinity,
-          height: 50,
-          child: OutlinedButton(
-            onPressed: isUpdatingStatus
-                ? null
-                : () => _confirmUpdateStatus('ditolak'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.red.shade700,
-              side: BorderSide(
-                color: Colors.red.shade300,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildDetailItem(
+                label: 'Posisi yang Dilamar',
+                value: posisi,
               ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(13),
+              const Divider(height: 24, color: Color(0xFFF1F5F9)),
+              _buildDetailItem(
+                label: 'Alamat Email',
+                value: email.isNotEmpty ? email : '-',
               ),
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.cancel_outlined,
-                  size: 19,
-                ),
-                SizedBox(width: 9),
-                Text(
-                  'Tolak Pelamar',
-                  style: TextStyle(
-                    fontFamily: 'poppins',
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
+              const Divider(height: 24, color: Color(0xFFF1F5F9)),
+              _buildDetailItem(
+                label: 'Nomor Telepon / WhatsApp',
+                value: phone.isNotEmpty ? phone : '-',
+              ),
+              const Divider(height: 24, color: Color(0xFFF1F5F9)),
+              _buildDetailItem(
+                label: 'Domisili',
+                value: alamat,
+              ),
+              const Divider(height: 24, color: Color(0xFFF1F5F9)),
+              _buildDetailItem(
+                label: 'Ringkasan Kualifikasi',
+                value: aboutMe,
+                isMultiLine: true,
+              ),
+            ],
           ),
         ),
       ],
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      appBar: AppBar(
-        backgroundColor: backgroundColor,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        centerTitle: false,
-        title: const Text(
-          'Detail Pelamar',
+  Widget _buildDetailItem({
+    required String label,
+    required String value,
+    bool isMultiLine = false,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: const TextStyle(
+              fontFamily: 'poppins',
+              fontSize: 10.5,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+              color: Color(0xFF64748B),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              fontFamily: 'poppins',
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
+              color: blackColor,
+              height: isMultiLine ? 1.5 : 1.25,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCvDocumentCard({required String linkCv}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Berkas Lamaran',
           style: TextStyle(
             fontFamily: 'poppins',
-            fontSize: 17,
+            fontSize: 15,
             fontWeight: FontWeight.w700,
-            color: textColor,
+            color: blackColor,
           ),
         ),
-        iconTheme: const IconThemeData(
-          color: textColor,
-        ),
-      ),
-      body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(
-                color: darkMaroon,
-              ),
-            )
-          : pelamar == null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.person_search_rounded,
-                          size: 55,
-                          color: secondaryColor,
-                        ),
-                        const SizedBox(height: 14),
-                        const Text(
-                          'Data pelamar tidak ditemukan.',
-                          style: TextStyle(
-                            fontFamily: 'poppins',
-                            fontSize: 13,
-                            color: textColor,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        ElevatedButton(
-                          onPressed: () => fetchDetailPelamar(
-                            widget.id_lamaran_perusahaan,
-                          ),
-                          child: const Text('Coba Lagi'),
-                        ),
-                      ],
-                    ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF2F2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFFFCA5A5).withOpacity(0.4),
                   ),
-                )
-              : SafeArea(
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(
-                      20,
-                      12,
-                      20,
-                      30,
+                ),
+                child: const Icon(
+                  Icons.picture_as_pdf_rounded,
+                  color: Color(0xFFB91C1C),
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Curriculum Vitae (CV)',
+                      style: TextStyle(
+                        fontFamily: 'poppins',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: blackColor,
+                      ),
                     ),
+                    const SizedBox(height: 2),
+                    const Text(
+                      'Dokumen PDF • Resume kandidat',
+                      style: TextStyle(
+                        fontFamily: 'poppins',
+                        fontSize: 11,
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton.icon(
+                onPressed: () {
+                  if (linkCv.isNotEmpty) {
+                    _launchExternalUrl(
+                      linkCv,
+                      'Dokumen CV tidak dapat dibuka secara langsung.',
+                    );
+                  } else {
+                    _showSnackBar(
+                      'Dokumen CV kandidat belum diunggah.',
+                      isError: true,
+                    );
+                  }
+                },
+                icon: const Icon(Icons.visibility_outlined, size: 15),
+                label: const Text(
+                  'Lihat CV',
+                  style: TextStyle(
+                    fontFamily: 'poppins',
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: darkMaroon,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDecisionSection({required String status}) {
+    final bool isAlreadyDecided = status == 'diterima' || status == 'ditolak';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Keputusan Rekrutmen',
+          style: TextStyle(
+            fontFamily: 'poppins',
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: blackColor,
+          ),
+        ),
+        const SizedBox(height: 12),
+        if (isAlreadyDecided)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: status == 'diterima'
+                  ? const Color(0xFFECFDF5)
+                  : const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: status == 'diterima'
+                    ? const Color(0xFFA7F3D0)
+                    : const Color(0xFFE2E8F0),
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  status == 'diterima'
+                      ? Icons.check_circle_outline_rounded
+                      : Icons.info_outline_rounded,
+                  color: status == 'diterima'
+                      ? const Color(0xFF047857)
+                      : const Color(0xFF64748B),
+                  size: 22,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(22),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: borderColor,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.025),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            _buildProfileImage(),
-                            const SizedBox(height: 15),
-                            Text(
-                              '${pelamar['first_name'] ?? ''} ${pelamar['last_name'] ?? ''}'
-                                  .trim(),
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontFamily: 'poppins',
-                                fontSize: 17,
-                                fontWeight: FontWeight.w700,
-                                color: textColor,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            _buildStatusBadge(),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 25),
-
-                      const Text(
-                        'Informasi Pelamar',
+                      Text(
+                        status == 'diterima'
+                            ? 'Pelamar Telah Diterima'
+                            : 'Pelamar Telah Ditolak',
                         style: TextStyle(
                           fontFamily: 'poppins',
-                          fontSize: 15,
+                          fontSize: 13,
                           fontWeight: FontWeight.w700,
-                          color: textColor,
+                          color: status == 'diterima'
+                              ? const Color(0xFF047857)
+                              : blackColor,
                         ),
                       ),
-                      const SizedBox(height: 5),
-                      const Text(
-                        'Informasi mengenai pelamar dan posisi pekerjaan.',
+                      const SizedBox(height: 3),
+                      Text(
+                        status == 'diterima'
+                            ? 'Status penerimaan kandidat sudah ditetapkan. Anda dapat segera menghubungi kandidat untuk proses verifikasi berkas asli atau onboarding.'
+                            : 'Status lamaran ini sudah ditandai ditolak.',
                         style: TextStyle(
                           fontFamily: 'poppins',
                           fontSize: 11,
-                          color: secondaryColor,
+                          color: status == 'diterima'
+                              ? const Color(0xFF065F46)
+                              : const Color(0xFF64748B),
+                          height: 1.4,
                         ),
                       ),
-
-                      const SizedBox(height: 16),
-
-                      _buildInformationField(
-                        label: 'First Name',
-                        value:
-                            pelamar['first_name']?.toString() ?? '-',
-                        icon: Icons.person_outline_rounded,
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      _buildInformationField(
-                        label: 'Last Name',
-                        value:
-                            pelamar['last_name']?.toString() ?? '-',
-                        icon: Icons.person_outline_rounded,
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      _buildInformationField(
-                        label: 'Posisi yang Dilamar',
-                        value: pelamar['posisi']?.toString() ?? '-',
-                        icon: Icons.work_outline_rounded,
-                      ),
-
-                      const SizedBox(height: 22),
-
-                      Container(
-                        padding: const EdgeInsets.all(17),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: borderColor,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 43,
-                              height: 43,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF5E8EA),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(
-                                Icons.picture_as_pdf_rounded,
-                                color: darkMaroon,
-                                size: 23,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            const Expanded(
-                              child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Curriculum Vitae',
-                                    style: TextStyle(
-                                      fontFamily: 'poppins',
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: textColor,
-                                    ),
-                                  ),
-                                  SizedBox(height: 3),
-                                  Text(
-                                    'Lihat dokumen CV pelamar',
-                                    style: TextStyle(
-                                      fontFamily: 'poppins',
-                                      fontSize: 10,
-                                      color: secondaryColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            IconButton(
-                              onPressed: () => _launchCV(
-                                pelamar['curriculum_vitae']?.toString(),
-                              ),
-                              icon: const Icon(
-                                Icons.download_rounded,
-                                color: darkMaroon,
-                              ),
-                              tooltip: 'Download CV',
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 28),
-
-                      const Text(
-                        'Keputusan Lamaran',
-                        style: TextStyle(
-                          fontFamily: 'poppins',
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: textColor,
-                        ),
-                      ),
-
-                      const SizedBox(height: 5),
-
-                      const Text(
-                        'Tentukan keputusan terhadap lamaran pekerjaan ini.',
-                        style: TextStyle(
-                          fontFamily: 'poppins',
-                          fontSize: 11,
-                          color: secondaryColor,
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      _buildActionButtons(),
                     ],
                   ),
                 ),
+              ],
+            ),
+          )
+        else
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: isUpdatingStatus
+                      ? null
+                      : () => _confirmUpdateStatus('diterima'),
+                  icon: const Icon(Icons.check_circle_outline_rounded, size: 17),
+                  label: isUpdatingStatus
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text(
+                          'Terima',
+                          style: TextStyle(
+                            fontFamily: 'poppins',
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF047857),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: isUpdatingStatus
+                      ? null
+                      : () => _confirmUpdateStatus('ditolak'),
+                  icon: const Icon(Icons.cancel_outlined, size: 17),
+                  label: const Text(
+                    'Tolak',
+                    style: TextStyle(
+                      fontFamily: 'poppins',
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFFB91C1C),
+                    side: const BorderSide(
+                      color: Color(0xFFFCA5A5),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+      ],
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: darkMaroon.withOpacity(0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.person_off_outlined,
+                size: 32,
+                color: darkMaroon,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Gagal Memuat Profil',
+              style: TextStyle(
+                fontFamily: 'poppins',
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: blackColor,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              errorMessage ?? 'Terjadi kesalahan saat memuat data.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'poppins',
+                fontSize: 12,
+                color: Color(0xFF475569),
+              ),
+            ),
+            const SizedBox(height: 18),
+            ElevatedButton.icon(
+              onPressed: () =>
+                  fetchDetailPelamar(widget.id_lamaran_perusahaan),
+              icon: const Icon(Icons.refresh_rounded, size: 16),
+              label: const Text(
+                'Coba Lagi',
+                style: TextStyle(
+                  fontFamily: 'poppins',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: darkMaroon,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                elevation: 0,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

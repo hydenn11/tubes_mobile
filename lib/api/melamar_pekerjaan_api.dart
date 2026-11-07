@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:rekanpabrik/api/posting_pekerjaan_api.dart';
 
 class MelamarPekerjaanapi {
   final String apiUrl = 'dummy_mode';
@@ -130,6 +131,11 @@ class MelamarPekerjaanapi {
         (element) => element['id_lamaran_pekerjaan'] == idLamaranPekerjaan);
     if (index != -1) {
       _dummyHistory[index]['status_lamaran'] = status;
+    }
+    final pIndex = Postingpekerjaanapi.dummyPelamar.indexWhere(
+        (element) => element['id_lamaran_pekerjaan'] == idLamaranPekerjaan);
+    if (pIndex != -1) {
+      Postingpekerjaanapi.dummyPelamar[pIndex]['status_lamaran'] = status;
     }
     return true;
   }
