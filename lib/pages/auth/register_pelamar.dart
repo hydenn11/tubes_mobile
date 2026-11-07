@@ -1,6 +1,8 @@
 part of '../page.dart';
 
 class register_pelamar extends StatefulWidget {
+  const register_pelamar({super.key});
+
   @override
   _registerPelamarState createState() => _registerPelamarState();
 }

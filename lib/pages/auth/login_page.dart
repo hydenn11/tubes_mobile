@@ -1,6 +1,8 @@
 part of '../page.dart';
 
 class login_page extends StatefulWidget {
+  const login_page({super.key});
+
   @override
   _loginPageState createState() => _loginPageState();
 }

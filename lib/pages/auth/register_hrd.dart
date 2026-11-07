@@ -1,6 +1,8 @@
 part of '../page.dart';
 
 class register_hrd extends StatefulWidget {
+  const register_hrd({super.key});
+
   @override
   _registerHrdState createState() => _registerHrdState();
 }

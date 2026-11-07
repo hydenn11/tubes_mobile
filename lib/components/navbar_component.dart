@@ -3,6 +3,8 @@ import 'package:rekanpabrik/pages/page.dart';
 import 'package:rekanpabrik/shared/shared.dart';
 
 class navbarComponent extends StatefulWidget {
+  const navbarComponent({super.key});
+
   @override
   _NavbarComponentState createState() => _NavbarComponentState();
 }
