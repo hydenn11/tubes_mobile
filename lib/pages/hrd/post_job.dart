@@ -61,7 +61,6 @@ class _PostjobState extends State<Postjob> {
           errorMessage = null;
         });
 
-        // Pre-fill location from company address if empty
         if (lokasiPekerjaanController.text.trim().isEmpty &&
             user?['alamat'] != null) {
           lokasiPekerjaanController.text = user['alamat'].toString();

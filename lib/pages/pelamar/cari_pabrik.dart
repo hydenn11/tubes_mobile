@@ -30,24 +30,26 @@ class _CariPabrik extends State<CariPabrik> {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        "Temukan Perusahaan Terbaik",
+                        "Daftar Perusahaan",
                         style: TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                            color: thirdColor),
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'poppins',
+                            color: blackColor),
                       ),
                     ),
                     const SizedBox(
-                      height: 10,
+                      height: 6,
                     ),
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        "Mencari pekerjaan pabrik yang sempurna? Baik Anda seorang pekerja terampil atau baru memulai karier, menemukan peluang yang tepat bisa jadi sulit. Platform kami mempermudahnya dengan menghubungkan para pencari kerja dengan perusahaan manufaktur terkemuka di industri ini.",
+                        "Cari profil perusahaan manufaktur dan lihat lowongan yang tersedia.",
                         style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 13,
                             fontWeight: FontWeight.normal,
-                            color: thirdColor),
+                            fontFamily: 'poppins',
+                            color: greyColor),
                       ),
                     ),
                   ],
